@@ -19,3 +19,4 @@ et l'ancien passe au statut « Remplacé par ». L'historique du raisonnement es
 | 0011 | [Pas de bus d'événements pour l'instant](0011-pas-de-bus-evenements.md)                | Accepté |
 | 0012 | [Sortie paramétrable : le port PriceSink](0012-sorties-parametrables-price-sink.md)     | Accepté |
 | 0013 | [Pas de pilotage de navigateur ni de camouflage : fournisseur externe pour l'usage pro](0013-fournisseur-externe-pour-usage-pro.md) | Accepté |
+| 0014 | [Archives distillées (JSON embarqué + Markdown) et rétention](0014-archives-distillees-et-retention.md) | Accepté |

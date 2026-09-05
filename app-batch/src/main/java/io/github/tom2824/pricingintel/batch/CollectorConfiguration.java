@@ -2,6 +2,7 @@ package io.github.tom2824.pricingintel.batch;
 
 import io.github.tom2824.pricingintel.collector.CollectionRun;
 import io.github.tom2824.pricingintel.collector.CompositePriceSink;
+import io.github.tom2824.pricingintel.collector.CompositeRawSnapshotStore;
 import io.github.tom2824.pricingintel.collector.ConsolePriceSink;
 import io.github.tom2824.pricingintel.collector.ListingProvider;
 import io.github.tom2824.pricingintel.collector.PageFetcher;
@@ -14,11 +15,14 @@ import io.github.tom2824.pricingintel.scraper.ScraperPriceSource;
 import io.github.tom2824.pricingintel.scraper.SiteDefinition;
 import io.github.tom2824.pricingintel.scraper.SiteDefinitionLoader;
 import io.github.tom2824.pricingintel.scraper.SiteRegistry;
+import io.github.tom2824.pricingintel.sink.file.DistilledSnapshotStore;
 import io.github.tom2824.pricingintel.sink.file.FileRawSnapshotStore;
 import io.github.tom2824.pricingintel.sink.file.JsonLinesPriceSink;
 import java.nio.file.Path;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,10 +62,29 @@ class CollectorConfiguration {
 
     @Bean
     RawSnapshotStore rawSnapshotStore(CollectorProperties properties) {
-        if (!properties.raw().enabled()) {
+        CollectorProperties.Raw raw = properties.raw();
+        if (!raw.enabled()) {
             return RawSnapshotStore.none();
         }
-        return new FileRawSnapshotStore(Path.of(properties.raw().dir()));
+        Path root = Path.of(raw.dir());
+        List<RawSnapshotStore> stores = new ArrayList<>();
+        if (raw.distilled().enabled()) {
+            stores.add(new DistilledSnapshotStore(root, retentionOrNull(raw.distilled().retention())));
+            LOG.info("Raw pages: distilled archive under {} (retention {})", root, describe(raw.distilled().retention()));
+        }
+        if (raw.html().enabled()) {
+            stores.add(new FileRawSnapshotStore(root, retentionOrNull(raw.html().retention())));
+            LOG.info("Raw pages: full HTML archive under {} (retention {})", root, describe(raw.html().retention()));
+        }
+        return CompositeRawSnapshotStore.of(stores);
+    }
+
+    private static Duration retentionOrNull(Duration retention) {
+        return retention == null || retention.isZero() || retention.isNegative() ? null : retention;
+    }
+
+    private static String describe(Duration retention) {
+        return retentionOrNull(retention) == null ? "unlimited" : retention.toDays() + " days";
     }
 
     @Bean

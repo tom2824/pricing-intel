@@ -40,3 +40,9 @@ collector:
   raw:
     enabled: true
     dir: data/raw
+    distilled:               # blocs JSON + Markdown du contenu visible : léger, archive de long terme (ADR 0014)
+      enabled: true
+      retention: 180d        # 0 = jamais purgé
+    html:                    # HTML complet : lourd, pour déboguer un extracteur qui casse
+      enabled: false
+      retention: 7d

@@ -10,35 +10,45 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 
 /**
- * Archive chaque réponse brute sous {@code <racine>/<annonce>/<horodatage>.html.gz}, avec un fichier
- * {@code .meta.json} à côté (statut, URL finale, type de contenu). Séparer "collecter" et "extraire" permet
- * de rejouer une extraction corrigée sur les pages du passé au lieu d'avoir perdu les données.
+ * Archive chaque réponse HTML complète sous {@code <racine>/<annonce>/<horodatage>.html.gz}, avec un fichier
+ * {@code .meta.json} à côté (statut, URL finale, type de contenu). C'est la version lourde, utile pour déboguer
+ * un extracteur qui casse ; sa rétention est courte. Pour le long terme, voir {@link DistilledSnapshotStore}.
  */
 public final class FileRawSnapshotStore implements RawSnapshotStore {
 
+    static final String HTML_SUFFIX = ".html.gz";
+    static final String META_SUFFIX = ".meta.json";
+
     private static final ObjectMapper MAPPER = new ObjectMapper();
-    private static final DateTimeFormatter STAMP = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z'").withZone(ZoneOffset.UTC);
 
     private final Path root;
+    private final Duration retention;
 
+    /** Sans rétention : rien n'est jamais purgé. */
     public FileRawSnapshotStore(Path root) {
+        this(root, null);
+    }
+
+    /** @param retention âge au-delà duquel {@link #purgeExpired} supprime les archives, ou null pour ne jamais purger */
+    public FileRawSnapshotStore(Path root, Duration retention) {
         this.root = root;
+        this.retention = retention;
     }
 
     @Override
     public void store(ListingId listingId, FetchResult result) {
-        Path dir = root.resolve(safeName(listingId.value()));
-        String stamp = STAMP.format(result.fetchedAt());
+        Path dir = root.resolve(SnapshotRetention.safeName(listingId.value()));
+        String stamp = SnapshotRetention.stamp(result.fetchedAt());
         try {
             Files.createDirectories(dir);
-            try (OutputStream out = new GZIPOutputStream(Files.newOutputStream(dir.resolve(stamp + ".html.gz")))) {
+            try (OutputStream out = new GZIPOutputStream(Files.newOutputStream(dir.resolve(stamp + HTML_SUFFIX)))) {
                 out.write(result.body().getBytes(StandardCharsets.UTF_8));
             }
             Map<String, Object> meta = new LinkedHashMap<>();
@@ -49,18 +59,14 @@ public final class FileRawSnapshotStore implements RawSnapshotStore {
             meta.put("contentType", result.contentType());
             meta.put("fetchedAt", result.fetchedAt().toString());
             meta.put("bodyLength", result.body().length());
-            MAPPER.writerWithDefaultPrettyPrinter().writeValue(dir.resolve(stamp + ".meta.json").toFile(), meta);
+            MAPPER.writerWithDefaultPrettyPrinter().writeValue(dir.resolve(stamp + META_SUFFIX).toFile(), meta);
         } catch (IOException e) {
             throw new UncheckedIOException("Cannot archive raw snapshot of " + listingId + " under " + dir, e);
         }
     }
 
-    /** Les identifiants d'annonce sont libres ; on ne garde que ce qui est sûr dans un nom de dossier. */
-    static String safeName(String value) {
-        StringBuilder sb = new StringBuilder(value.length());
-        for (char c : value.toCharArray()) {
-            sb.append(Character.isLetterOrDigit(c) || c == '-' || c == '_' || c == '.' ? c : '_');
-        }
-        return sb.toString();
+    @Override
+    public int purgeExpired(Instant now) {
+        return SnapshotRetention.purge(root, name -> name.endsWith(HTML_SUFFIX) || name.endsWith(META_SUFFIX), retention, now);
     }
 }

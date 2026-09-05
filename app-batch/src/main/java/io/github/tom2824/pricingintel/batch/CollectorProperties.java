@@ -86,8 +86,21 @@ public record CollectorProperties(
             @NotBlank @DefaultValue("data/releves.jsonl") String jsonlFile) {
     }
 
+    /**
+     * Archivage des pages (ADR 0007 et 0014). Deux formats cumulables sous le même dossier :
+     * la version distillée (légère, longue rétention) et le HTML complet (lourd, courte rétention, débogage).
+     * Une rétention absente ou nulle signifie « ne jamais purger ».
+     */
     public record Raw(
             @DefaultValue("true") boolean enabled,
-            @NotBlank @DefaultValue("data/raw") String dir) {
+            @NotBlank @DefaultValue("data/raw") String dir,
+            @DefaultValue Distilled distilled,
+            @DefaultValue Html html) {
+
+        public record Distilled(@DefaultValue("true") boolean enabled, @DefaultValue("180d") Duration retention) {
+        }
+
+        public record Html(@DefaultValue("false") boolean enabled, @DefaultValue("7d") Duration retention) {
+        }
     }
 }

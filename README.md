@@ -26,7 +26,7 @@ flowchart LR
         collector[collector-core<br/>ports + CollectionRun]
     end
     subgraph adapters_out [Sorties]
-        file[sink-file<br/>JSON Lines · pages brutes]
+        file[sink-file<br/>JSON Lines · archives distillées]
         pg[sink-postgres<br/>à venir]
     end
     http[collector-http<br/>proxy · rate limit · retry · robots.txt]
@@ -47,7 +47,7 @@ flowchart LR
 | `collector-core`     | Ports `PriceSource`, `PriceSink`, `PageFetcher`, `RawSnapshotStore`, `ListingProvider` ; orchestration | `domain` |
 | `collector-http`     | Client HTTP poli : `ProxyPolicy` (aucun / fixe / rotation), rate limit par hôte, retry avec backoff, robots.txt | `collector-core` |
 | `source-scraper`     | Sites déclarés en YAML, chaîne d'extraction, parsing de prix FR/EN                     | `collector-core`, Jsoup, Jackson |
-| `sink-file`          | Relevés en JSON Lines, archivage compressé des pages brutes                            | `collector-core`, Jackson |
+| `sink-file`          | Relevés en JSON Lines, archives de pages distillées (JSON + Markdown) ou HTML complet, rétention | `collector-core`, Jackson, Jsoup |
 | `app-batch`          | Point d'entrée Spring Boot sans serveur web : configuration, assemblage, code de sortie | tout             |
 | `architecture-tests` | Règles ArchUnit sur les frontières entre modules                                       | tout (test)      |
 
@@ -73,8 +73,10 @@ cp config/listings.example.yml config/listings.yml
 java -jar app-batch/target/app-batch-0.1.0-SNAPSHOT-exec.jar
 ```
 
-Par défaut la collecte affiche chaque relevé en console, l'ajoute à `data/releves.jsonl`, et archive les pages
-brutes sous `data/raw/`. Le code de sortie vaut 1 si aucun relevé n'a pu être produit.
+Par défaut la collecte affiche chaque relevé en console, l'ajoute à `data/releves.jsonl`, et archive une version
+distillée de chaque page sous `data/raw/` (blocs JSON embarqués intacts + contenu visible en Markdown, quelques Ko,
+rétention 180 jours ; le HTML complet est optionnel, rétention 7 jours, voir ADR 0014). Les archives expirées sont
+purgées à la fin de chaque collecte. Le code de sortie vaut 1 si aucun relevé n'a pu être produit.
 
 Sous Windows, remplacer `./mvnw` par `mvnw.cmd`.
 

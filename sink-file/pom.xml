@@ -11,7 +11,7 @@
 
   <artifactId>sink-file</artifactId>
   <name>Pricing Intel :: Sink File</name>
-  <description>Sorties fichier : relevés en JSON Lines, snapshots bruts compressés.</description>
+  <description>Sorties fichier : relevés en JSON Lines, pages brutes (HTML complet ou version distillée) avec rétention.</description>
 
   <dependencies>
     <dependency>
@@ -25,6 +25,14 @@
     <dependency>
       <groupId>com.fasterxml.jackson.datatype</groupId>
       <artifactId>jackson-datatype-jsr310</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jsoup</groupId>
+      <artifactId>jsoup</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
     </dependency>
   </dependencies>
 </project>

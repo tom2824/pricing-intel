@@ -1,0 +1,10 @@
+listings:
+  - id: nowhere-1
+    product: p1
+    source: nowhere
+    url: https://nowhere.invalid/p/1
+  - id: nowhere-2
+    product: p2
+    source: nowhere
+    url: https://nowhere.invalid/p/2
+    externalRef: ext-2

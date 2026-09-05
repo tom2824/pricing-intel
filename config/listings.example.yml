@@ -1,0 +1,24 @@
+# Annonces à relever. Copier ce fichier en config/listings.yml (non versionné) et remplacer les URL
+# par de vraies fiches produit. Le matching produit ↔ annonce est manuel dans cette version (ADR 0008) :
+# c'est vous qui dites que ces trois URL vendent le même produit "rtx-4070-super-msi-ventus-2x".
+#
+#   id       : identifiant unique de l'annonce (libre, stable dans le temps)
+#   product  : identifiant du produit dans votre catalogue
+#   source   : identifiant de la source (informatif pour l'instant)
+#   url      : la fiche produit
+#   externalRef (optionnel) : identifiant côté source pour les API
+listings:
+  - id: ldlc-rtx4070s-msi-ventus
+    product: rtx-4070-super-msi-ventus-2x
+    source: ldlc
+    url: https://www.ldlc.com/fiche/PB00584657.html
+
+  - id: topachat-rtx4070s-msi-ventus
+    product: rtx-4070-super-msi-ventus-2x
+    source: topachat
+    url: https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_wgfx_pcie_puis_ref_est_in20017806.html
+
+  - id: materielnet-rtx4070s-msi-ventus
+    product: rtx-4070-super-msi-ventus-2x
+    source: materiel-net
+    url: https://www.materiel.net/produit/202401110019.html

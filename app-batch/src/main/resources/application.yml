@@ -1,0 +1,42 @@
+spring:
+  main:
+    web-application-type: none
+    banner-mode: "off"
+  application:
+    name: pricing-intel-batch
+
+logging:
+  pattern:
+    console: "%d{HH:mm:ss.SSS} %-5level %-40.40logger{39} : %msg%n"
+  level:
+    root: warn
+    io.github.tom2824.pricingintel: info
+
+# Toutes les clés sont surchargeables : --collector.sinks.types=jsonl, COLLECTOR_PROXY_MODE=fixed, etc.
+collector:
+  user-agent: "pricing-intel/0.1 (+https://github.com/tom2824/pricing-intel)"
+  timeout: 20s
+  respect-robots-txt: true
+  min-interval-per-host: 3s
+  default-currency: EUR
+  proxy:
+    mode: none          # none | fixed | rotating
+    # host: proxy.example.test
+    # port: 3128
+    # servers: [p1.example.test:8080, p2.example.test:8080]
+  retry:
+    max-attempts: 3
+    initial-backoff: 2s
+    multiplier: 2.0
+    max-backoff: 30s
+  sites:
+    dir: config/sites
+    allow-unknown-hosts: true
+  listings:
+    file: config/listings.yml
+  sinks:
+    types: [console, jsonl]   # console | jsonl (cumulables)
+    jsonl-file: data/releves.jsonl
+  raw:
+    enabled: true
+    dir: data/raw

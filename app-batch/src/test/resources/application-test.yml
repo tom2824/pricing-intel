@@ -1,0 +1,10 @@
+collector:
+  sites:
+    dir: src/test/resources/sites
+    allow-unknown-hosts: false
+  listings:
+    file: src/test/resources/listings-test.yml
+  sinks:
+    types: [console]
+  raw:
+    enabled: false

@@ -1,0 +1,10 @@
+# LDLC : chaîne d'extraction. Le JSON-LD est essayé en premier (ADR 0007) ; les sélecteurs CSS ci-dessous sont
+# un filet de secours et DOIVENT être vérifiés sur une vraie page avant d'être considérés fiables.
+id: ldlc
+host: "*.ldlc.com"
+extractors:
+  - type: jsonld
+  - type: css
+    price: "aside .price .price"
+    availability: ".stock-web .modal-stock-web"
+    title: "h1.title-1"

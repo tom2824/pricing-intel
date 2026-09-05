@@ -1,0 +1,9 @@
+# Materiel.net. Sélecteurs CSS à vérifier sur une vraie page : ils servent de repli au JSON-LD.
+id: materiel-net
+host: "*.materiel.net"
+extractors:
+  - type: jsonld
+  - type: css
+    price: ".o-product__price"
+    availability: ".o-availability__value"
+    title: "h1.c-product__title, h1"

@@ -1,0 +1,9 @@
+# TopAchat. Sélecteurs CSS à vérifier sur une vraie page : ils servent de repli au JSON-LD.
+id: topachat
+host: "*.topachat.com"
+extractors:
+  - type: jsonld
+  - type: css
+    price: ".priceFinal, .price-final"
+    availability: ".en-stock, .stock"
+    title: "h1"

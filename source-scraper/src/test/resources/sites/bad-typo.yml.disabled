@@ -1,0 +1,5 @@
+id: bad
+host: bad.test
+extractors:
+  - type: css
+    prise: ".price"

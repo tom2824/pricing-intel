@@ -1,0 +1,23 @@
+# Build
+target/
+*.class
+*.log
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+
+# Données collectées localement (jamais versionnées)
+data/
+
+# Config locale (proxy, listings perso)
+config/listings.yml
+config/*.local.yml
+
+# OS
+.DS_Store
+Thumbs.db

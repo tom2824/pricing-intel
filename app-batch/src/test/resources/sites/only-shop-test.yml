@@ -1,0 +1,4 @@
+id: shop-test
+host: "*.shop.test"
+extractors:
+  - type: jsonld

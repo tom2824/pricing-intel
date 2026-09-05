@@ -1,0 +1,23 @@
+# Profil "postgres" : SPRING_PROFILES_ACTIVE=postgres. Réactive JDBC/JPA/Flyway et branche la base.
+# Les identifiants viennent de l'environnement (secrets GitHub Actions, .env local), jamais de ce fichier.
+spring:
+  autoconfigure:
+    exclude: ""
+  datasource:
+    url: ${PRICING_INTEL_DB_URL:}            # ex. jdbc:postgresql://<host>:5432/postgres?sslmode=require
+    username: ${PRICING_INTEL_DB_USER:}
+    password: ${PRICING_INTEL_DB_PASSWORD:}
+    hikari:
+      maximum-pool-size: 3                     # un batch séquentiel n'a pas besoin de plus
+  jpa:
+    hibernate:
+      ddl-auto: none                           # le schéma appartient à Flyway
+    open-in-view: false
+  flyway:
+    enabled: true
+
+collector:
+  listings:
+    source: database
+  sinks:
+    types: [console, postgres]

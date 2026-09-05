@@ -1,6 +1,6 @@
 # Collecte planifiée (ADR 0004) : un cron GitHub Actions lance l'app en mode batch.
-# Pour l'instant les relevés sont conservés comme artefact du workflow ; le sink Postgres/Supabase viendra
-# dans une étape suivante et se branchera par configuration, sans toucher à ce workflow.
+# Avec les secrets PRICING_INTEL_DB_* définis, le profil "postgres" est activé : annonces lues en base,
+# relevés et échecs écrits en base (ADR 0005, 0018). Sans secrets, mode fichiers avec artefact du workflow.
 name: Collecte
 
 on:
@@ -13,6 +13,11 @@ jobs:
   collect:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      PRICING_INTEL_DB_URL: ${{ secrets.PRICING_INTEL_DB_URL }}
+      PRICING_INTEL_DB_USER: ${{ secrets.PRICING_INTEL_DB_USER }}
+      PRICING_INTEL_DB_PASSWORD: ${{ secrets.PRICING_INTEL_DB_PASSWORD }}
+      SPRING_PROFILES_ACTIVE: ${{ secrets.PRICING_INTEL_DB_URL != '' && 'postgres' || '' }}
     steps:
       - uses: actions/checkout@v5
 
@@ -26,20 +31,20 @@ jobs:
         run: ./mvnw -B --no-transfer-progress -DskipTests -pl app-batch -am package
 
       - name: Run the collection
-        # Les annonces à relever sont dans config/listings.yml (non versionné) : on part de l'exemple
-        # tant que le fichier réel n'est pas fourni autrement (secret, artefact, base de données...).
+        # Mode fichiers : les annonces viennent de config/listings.yml (non versionné), on part de l'exemple.
+        # Mode postgres : les annonces viennent de la base, alimentée par l'import du catalogue.
         run: |
           if [ ! -f config/listings.yml ]; then cp config/listings.example.yml config/listings.yml; fi
           java -jar app-batch/target/app-batch-*-exec.jar \
-            --collector.sinks.types=console,jsonl \
             --collector.sinks.jsonl-file=data/releves-${{ github.run_id }}.jsonl
 
       - name: Publish collected snapshots
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: releves-${{ github.run_id }}
           path: |
             data/*.jsonl
             data/raw/**
           retention-days: 30
+          if-no-files-found: ignore

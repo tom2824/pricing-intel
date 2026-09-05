@@ -1,7 +1,7 @@
 # 0003. Spring confiné aux modules d'application
 
 **Date** : 2026-09-05
-**Statut** : Accepté
+**Statut** : Accepté, amendé par [0018](0018-persistance-spring-data-jpa-flyway.md) : les adaptateurs de persistance peuvent utiliser Spring
 
 ## Contexte
 

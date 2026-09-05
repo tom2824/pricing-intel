@@ -1,0 +1,80 @@
+# Catalogue de démonstration (ADR 0015, 0016). Copier en config/catalogue.yml, compléter, puis importer :
+#   SPRING_PROFILES_ACTIVE=postgres java -jar app-batch/target/app-batch-*-exec.jar --collector.catalogue.import-file=config/catalogue.yml
+# L'import est idempotent : un produit est reconnu par sa clé naturelle, une annonce par son code.
+#
+# Familles disponibles (V2 des migrations) : gpu, ssd, ram, game. Les caractéristiques sont normalisées à
+# l'import ("12 Go" = 12) et validées contre le schéma de la famille : une faute de frappe est refusée.
+# L'état (neuf, reconditionné) n'est pas ici : il est observé sur chaque annonce.
+
+products:
+  # ---- GPU : segment RTX 4070 SUPER 12 Go, trois marques ---------------------------------------------
+  - key: rtx4070s-msi-ventus
+    family: gpu
+    brand: MSI
+    mpn: RTX 4070 SUPER 12G VENTUS 2X OC
+    name: MSI GeForce RTX 4070 SUPER 12G VENTUS 2X OC
+    attributes: {chipset: RTX 4070 SUPER, vram_gb: 12, variant: Ventus 2X OC, tdp_w: 220}
+    identifiers:
+      - {scheme: gtin, value: "4711377114363"}
+    purchasePrice: 520        # prix d'achat fictif, pour les stratégies à marge cible
+    currentPrice: 599.99      # notre prix actuel, pour les règles de variation maximale
+
+  - key: rtx4070s-gigabyte-windforce
+    family: gpu
+    brand: Gigabyte
+    mpn: GV-N407SWF3OC-12GD
+    name: Gigabyte GeForce RTX 4070 SUPER WINDFORCE OC 12G
+    attributes: {chipset: RTX 4070 SUPER, vram_gb: 12, variant: Windforce OC}
+
+  - key: rtx4070s-asus-dual
+    family: gpu
+    brand: ASUS
+    mpn: DUAL-RTX4070S-O12G
+    name: ASUS Dual GeForce RTX 4070 SUPER OC 12GB
+    attributes: {chipset: RTX 4070 SUPER, vram_gb: 12, variant: Dual OC}
+
+  # ---- SSD : segment 2 To PCIe 4.0 NVMe M.2 2280 ----------------------------------------------------
+  - key: ssd-samsung-990pro-2to
+    family: ssd
+    brand: Samsung
+    mpn: MZ-V9P2T0BW
+    name: Samsung 990 PRO 2 To
+    attributes: {capacity_gb: 2000, interface: PCIe 4.0 NVMe, form_factor: M.2 2280, heatsink: false, read_mbps: 7450}
+
+  - key: ssd-wd-sn850x-2to
+    family: ssd
+    brand: Western Digital
+    mpn: WDS200T2X0E
+    name: WD_BLACK SN850X 2 To
+    attributes: {capacity_gb: 2000, interface: PCIe 4.0 NVMe, form_factor: M.2 2280, heatsink: false, read_mbps: 7300}
+
+  # ---- RAM : segment DDR5 32 Go 6000 CL30 -----------------------------------------------------------
+  - key: ram-kingston-fury-beast-32-6000
+    family: ram
+    brand: Kingston
+    mpn: KF560C30BBK2-32
+    name: Kingston FURY Beast 32 Go (2 x 16 Go) DDR5 6000 MHz CL30
+    attributes: {capacity_gb: 32, type: DDR5, speed_mts: 6000, cas_latency: 30, kit: 2x16, rgb: false}
+
+  - key: ram-corsair-vengeance-32-6000
+    family: ram
+    brand: Corsair
+    mpn: CMK32GX5M2B6000C30
+    name: Corsair Vengeance 32 Go (2 x 16 Go) DDR5 6000 MHz CL30
+    attributes: {capacity_gb: 32, type: DDR5, speed_mts: 6000, cas_latency: 30, kit: 2x16, rgb: false}
+
+listings:
+  # Une annonce = une fiche produit sur un site. Le champ "product" crée la correspondance validée (manuelle).
+  # Les URL ci-dessous sont des exemples à remplacer par de vraies fiches.
+  - code: ldlc-rtx4070s-msi-ventus
+    product: rtx4070s-msi-ventus
+    source: ldlc
+    url: https://www.ldlc.com/fiche/PB00584657.html
+  - code: topachat-rtx4070s-msi-ventus
+    product: rtx4070s-msi-ventus
+    source: topachat
+    url: https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_wgfx_pcie_puis_ref_est_in20017806.html
+  - code: materielnet-rtx4070s-msi-ventus
+    product: rtx4070s-msi-ventus
+    source: materiel-net
+    url: https://www.materiel.net/produit/202401110019.html

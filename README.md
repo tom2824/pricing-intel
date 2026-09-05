@@ -3,8 +3,9 @@
 Veille tarifaire multi-sources et moteur de recommandation de prix, appliqués aux jeux vidéo et aux composants PC.
 Un produit, N sources, un historique fiable, puis un prix proposé selon la stratégie choisie, avec son explication.
 
-État : **brique de collecte par scraping** livrée (ce dépôt). Viennent ensuite les sources API (jeux),
-le stockage Postgres, l'analyse de marché, le moteur de stratégies et l'API de lecture.
+État : **collecte par scraping** et **persistance PostgreSQL** (catalogue, correspondances, relevés quotidiens avec
+quarantaine, échecs de collecte) livrées. Viennent ensuite la source API pour les jeux, l'analyse de marché,
+le moteur de stratégies et l'API de lecture.
 
 Les choix d'architecture sont documentés dans [docs/adr](docs/adr/README.md), la démarche dans
 [docs/philosophie.md](docs/philosophie.md).
@@ -27,7 +28,7 @@ flowchart LR
     end
     subgraph adapters_out [Sorties]
         file[sink-file<br/>JSON Lines · archives distillées]
-        pg[sink-postgres<br/>à venir]
+        pg[persistence<br/>PostgreSQL · Flyway · catalogue · relevés]
     end
     http[collector-http<br/>proxy · rate limit · retry · robots.txt]
     batch[app-batch<br/>Spring Boot, mode batch]
@@ -36,9 +37,10 @@ flowchart LR
     api -. PriceSource .-> collector
     http -- PageFetcher --> scraper
     collector -- PriceSink --> file
-    collector -. PriceSink .-> pg
+    collector -- PriceSink --> pg
+    pg -- ListingProvider --> collector
     collector --> domain
-    batch -- assemble --> scraper & http & file & collector
+    batch -- assemble --> scraper & http & file & pg & collector
 ```
 
 | Module               | Rôle                                                                                   | Dépend de        |
@@ -48,6 +50,7 @@ flowchart LR
 | `collector-http`     | Client HTTP poli : `ProxyPolicy` (aucun / fixe / rotation), rate limit par hôte, retry avec backoff, robots.txt | `collector-core` |
 | `source-scraper`     | Sites déclarés en YAML, chaîne d'extraction, parsing de prix FR/EN                     | `collector-core`, Jsoup, Jackson |
 | `sink-file`          | Relevés en JSON Lines, archives de pages distillées (JSON + Markdown) ou HTML complet, rétention | `collector-core`, Jackson, Jsoup |
+| `persistence`        | Adaptateur PostgreSQL : schéma Flyway, catalogue en JPA (familles, produits, identifiants, annonces, correspondances), relevés avec quarantaine et échecs en SQL natif, import de catalogue YAML | `collector-core`, Spring Data JPA, Flyway |
 | `app-batch`          | Point d'entrée Spring Boot sans serveur web : configuration, assemblage, code de sortie | tout             |
 | `architecture-tests` | Règles ArchUnit sur les frontières entre modules                                       | tout (test)      |
 
@@ -135,6 +138,31 @@ URL finale et horodatage. Exemple d'une ligne de `releves.jsonl` :
 {"listingId":{"value":"ldlc-rtx4070s-msi-ventus"},"observedAt":"2026-09-05T08:00:12.418Z","observedUrl":"https://www.ldlc.com/fiche/PB00584657.html","price":{"amount":629.95,"currency":"EUR"},"availability":"IN_STOCK","condition":"NEW","sellerType":"UNKNOWN","identity":{"gtin":"4711377114363","brand":"MSI","sku":"PB00584657","title":"MSI GeForce RTX 4070 SUPER 12G VENTUS 2X OC"},"extraction":{"method":"jsonld","confidence":0.95}}
 ```
 
+## Base de données (profil `postgres`)
+
+Sans base configurée, tout tourne en mode fichiers. Le profil Spring `postgres` branche PostgreSQL (Supabase ou
+n'importe quel Postgres) : Flyway crée le schéma, les annonces sont lues en base, les relevés y sont écrits
+(une ligne par annonce et par jour, upsert, quarantaine des prix aberrants), les échecs de collecte aussi.
+
+```bash
+export SPRING_PROFILES_ACTIVE=postgres PRICING_INTEL_DB_URL="jdbc:postgresql://HOST:5432/postgres?sslmode=require" PRICING_INTEL_DB_USER=postgres PRICING_INTEL_DB_PASSWORD=...
+```
+
+Importer le catalogue (produits, identifiants, annonces et correspondances manuelles) puis collecter :
+
+```bash
+cp config/catalogue.example.yml config/catalogue.yml
+```
+
+```bash
+java -jar app-batch/target/app-batch-0.1.0-SNAPSHOT-exec.jar --collector.catalogue.import-file=config/catalogue.yml
+```
+
+L'import est idempotent. Le modèle est décrit dans les ADR 0015 à 0018 : familles de produits avec
+caractéristiques à rôles (identité, équivalence, descriptive), clé naturelle unique, identifiants multiples
+(plusieurs GTIN par produit), correspondances annonce ↔ produit datées avec preuve, relevé quotidien.
+Les tests de persistance tournent sur un PostgreSQL embarqué, sans Docker.
+
 ## Politesse et cadre d'usage
 
 Un relevé par annonce et par jour, une requête toutes les trois secondes par hôte, User-Agent qui identifie
@@ -143,8 +171,8 @@ pas de proxy par défaut, pas d'appel aux API internes des sites. Détails et ra
 
 ## Feuille de route
 
-1. Source API pour les jeux (CheapShark, puis IsThereAnyDeal)
-2. Sink Postgres (Supabase) et cron GitHub Actions actif
+1. Base Supabase branchée, cron GitHub Actions actif, premier vrai relevé
+2. Source API pour les jeux (CheapShark, puis IsThereAnyDeal)
 3. Analyse de marché : min, médiane, index, exclusion des hors-stock et des aberrants
 4. Moteur de stratégies avec explication (alignement, undercut, index cible, marge cible, suivi d'un leader ;
    règles transverses : plancher, plafond, arrondi ,99, variation max par jour)

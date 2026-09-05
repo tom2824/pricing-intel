@@ -1,0 +1,48 @@
+products:
+  - key: rtx4070s-msi
+    family: gpu
+    brand: MSI
+    mpn: RTX 4070 SUPER 12G VENTUS 2X OC
+    name: MSI GeForce RTX 4070 SUPER 12G VENTUS 2X OC
+    attributes: {chipset: "RTX 4070 SUPER", vram_gb: "12 Go", variant: "Ventus 2X OC"}
+    identifiers:
+      - {scheme: gtin, value: "4711377114363"}
+      - {scheme: gtin, value: "0 12345 67890 5"}    # UPC-12 : complété à 13
+    purchasePrice: 520
+    currentPrice: 599.99
+  - key: rtx4070s-gigabyte
+    family: gpu
+    brand: Gigabyte
+    mpn: GV-N407SWF3OC-12GD
+    name: Gigabyte GeForce RTX 4070 SUPER WINDFORCE OC 12G
+    attributes: {chipset: "rtx-4070-super", vram_gb: 12, variant: "Windforce OC"}
+  - key: ssd-990pro-2to
+    family: ssd
+    brand: Samsung
+    mpn: MZ-V9P2T0BW
+    name: Samsung 990 PRO 2 To
+    attributes: {capacity_gb: 2000, interface: "pcie 4.0 nvme", form_factor: "M.2 2280", heatsink: non}
+  - key: game-standard
+    family: game
+    brand: Larian Studios
+    name: Baldur's Gate 3
+    attributes: {edition: standard}
+    identifiers:
+      - {scheme: steam_appid, value: "1086940"}
+
+listings:
+  - code: ldlc-rtx4070s-msi
+    product: rtx4070s-msi
+    source: ldlc
+    url: https://www.ldlc.com/fiche/PB00584657.html
+  - code: topachat-rtx4070s-msi
+    product: rtx4070s-msi
+    source: topachat
+    url: https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_wgfx_pcie_puis_ref_est_in20017806.html
+  - code: ldlc-rtx4070s-gigabyte
+    product: rtx4070s-gigabyte
+    source: ldlc
+    url: https://www.ldlc.com/fiche/PB00584660.html
+  - code: newshop-orphan
+    source: newshop
+    url: https://newshop.test/p/1

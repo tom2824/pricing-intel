@@ -1,5 +1,6 @@
 package io.github.tom2824.pricingintel.batch;
 
+import io.github.tom2824.pricingintel.collector.CollectionReportSink;
 import io.github.tom2824.pricingintel.collector.CollectionRun;
 import io.github.tom2824.pricingintel.collector.CompositePriceSink;
 import io.github.tom2824.pricingintel.collector.CompositeRawSnapshotStore;
@@ -11,6 +12,9 @@ import io.github.tom2824.pricingintel.collector.PriceSource;
 import io.github.tom2824.pricingintel.collector.RawSnapshotStore;
 import io.github.tom2824.pricingintel.http.FetcherConfig;
 import io.github.tom2824.pricingintel.http.Fetchers;
+import io.github.tom2824.pricingintel.persistence.PostgresCollectionReportSink;
+import io.github.tom2824.pricingintel.persistence.PostgresListingProvider;
+import io.github.tom2824.pricingintel.persistence.PostgresPriceSink;
 import io.github.tom2824.pricingintel.scraper.ScraperPriceSource;
 import io.github.tom2824.pricingintel.scraper.SiteDefinition;
 import io.github.tom2824.pricingintel.scraper.SiteDefinitionLoader;
@@ -26,19 +30,24 @@ import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
 /**
  * Assemblage des briques à partir de la configuration. C'est ici, et seulement ici, que les adaptateurs
- * concrets (client HTTP, scraper, sinks fichier) sont branchés sur les ports du cœur.
+ * concrets (client HTTP, scraper, sinks fichier, base PostgreSQL) sont branchés sur les ports du cœur.
+ * Les briques PostgreSQL n'existent que sous le profil {@code postgres} ; les demander sans ce profil est
+ * une erreur de configuration signalée au démarrage.
  */
 @Configuration
 @EnableConfigurationProperties(CollectorProperties.class)
 class CollectorConfiguration {
 
     private static final Logger LOG = LoggerFactory.getLogger(CollectorConfiguration.class);
+    private static final String POSTGRES_HINT = " requires the 'postgres' Spring profile (SPRING_PROFILES_ACTIVE=postgres)";
 
     /** UTC à la milliseconde : assez précis pour un relevé, et des horodatages lisibles dans les fichiers. */
     @Bean
@@ -104,20 +113,40 @@ class CollectorConfiguration {
     }
 
     @Bean
-    ListingProvider listingProvider(CollectorProperties properties) {
-        return new YamlListingProvider(Path.of(properties.listings().file()));
+    @Primary
+    ListingProvider listingProvider(CollectorProperties properties, ObjectProvider<PostgresListingProvider> postgres) {
+        CollectorProperties.Listings listings = properties.listings();
+        LOG.info("Listings: from {}", listings.source() == CollectorProperties.ListingsSource.YAML ? listings.file() : "database");
+        return switch (listings.source()) {
+            case YAML -> new YamlListingProvider(Path.of(listings.file()));
+            case DATABASE -> postgres.getIfAvailable(() -> {
+                throw new IllegalStateException("collector.listings.source=database" + POSTGRES_HINT);
+            });
+        };
     }
 
     @Bean(destroyMethod = "")
-    PriceSink priceSink(CollectorProperties properties) {
+    @Primary
+    PriceSink priceSink(CollectorProperties properties, ObjectProvider<PostgresPriceSink> postgres) {
         List<PriceSink> sinks = properties.sinks().types().stream()
                 .map(type -> switch (type) {
                     case CONSOLE -> (PriceSink) new ConsolePriceSink();
                     case JSONL -> new JsonLinesPriceSink(Path.of(properties.sinks().jsonlFile()));
+                    case POSTGRES -> postgres.getIfAvailable(() -> {
+                        throw new IllegalStateException("collector.sinks.types=postgres" + POSTGRES_HINT);
+                    });
                 })
                 .toList();
         LOG.info("Sinks: {}", properties.sinks().types());
         return CompositePriceSink.of(sinks);
+    }
+
+    /** Les échecs vont en base quand elle est là, sinon ils ne vivent que dans les logs. */
+    @Bean
+    @Primary
+    CollectionReportSink collectionReportSink(ObjectProvider<PostgresCollectionReportSink> postgres) {
+        PostgresCollectionReportSink sink = postgres.getIfAvailable();
+        return sink != null ? sink : CollectionReportSink.none();
     }
 
     @Bean

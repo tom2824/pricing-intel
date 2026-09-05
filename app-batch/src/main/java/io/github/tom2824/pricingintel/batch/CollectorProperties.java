@@ -30,7 +30,8 @@ public record CollectorProperties(
         @DefaultValue Sites sites,
         @DefaultValue Listings listings,
         @DefaultValue Sinks sinks,
-        @DefaultValue Raw raw) {
+        @DefaultValue Raw raw,
+        @DefaultValue Catalogue catalogue) {
 
     public FetcherConfig toFetcherConfig() {
         return new FetcherConfig(userAgent, timeout, proxy.toPolicy(), minIntervalPerHost, retry.toPolicy(), respectRobotsTxt);
@@ -76,10 +77,24 @@ public record CollectorProperties(
             @DefaultValue("true") boolean allowUnknownHosts) {
     }
 
-    public record Listings(@NotBlank @DefaultValue("config/listings.yml") String file) {
+    public enum ListingsSource { YAML, DATABASE }
+
+    /** D'où viennent les annonces à relever : le fichier YAML, ou la base (profil {@code postgres}). */
+    public record Listings(
+            @DefaultValue("yaml") ListingsSource source,
+            @NotBlank @DefaultValue("config/listings.yml") String file) {
     }
 
-    public enum SinkType { CONSOLE, JSONL }
+    /**
+     * Import d'un catalogue YAML (produits, identifiants, annonces) avant la collecte, profil {@code postgres}.
+     *
+     * @param importFile         chemin du fichier ; rien n'est importé s'il est absent
+     * @param collectAfterImport faux pour importer puis s'arrêter
+     */
+    public record Catalogue(String importFile, @DefaultValue("true") boolean collectAfterImport) {
+    }
+
+    public enum SinkType { CONSOLE, JSONL, POSTGRES }
 
     public record Sinks(
             @NotEmpty @DefaultValue("console") List<SinkType> types,

@@ -1,0 +1,11 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+  flyway:
+    enabled: true
+logging:
+  level:
+    root: warn
+    io.github.tom2824.pricingintel: info

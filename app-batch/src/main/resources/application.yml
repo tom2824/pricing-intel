@@ -4,6 +4,18 @@ spring:
     banner-mode: "off"
   application:
     name: pricing-intel-batch
+  # Sans base de données (profil par défaut), l'auto-configuration JDBC/JPA/Flyway est désactivée :
+  # l'application tourne en mode fichiers. Le profil "postgres" la réactive (voir application-postgres.yml).
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration
+      - org.springframework.boot.autoconfigure.jdbc.JdbcTemplateAutoConfiguration
+      - org.springframework.boot.autoconfigure.jdbc.JdbcClientAutoConfiguration
+      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration
+      - org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration
+      - org.springframework.boot.autoconfigure.sql.init.SqlInitializationAutoConfiguration
 
 logging:
   pattern:
@@ -33,9 +45,10 @@ collector:
     dir: config/sites
     allow-unknown-hosts: true
   listings:
+    source: yaml            # yaml | database (profil postgres)
     file: config/listings.yml
   sinks:
-    types: [console, jsonl]   # console | jsonl (cumulables)
+    types: [console, jsonl]   # console | jsonl | postgres (profil postgres), cumulables
     jsonl-file: data/releves.jsonl
   raw:
     enabled: true
@@ -46,3 +59,6 @@ collector:
     html:                    # HTML complet : lourd, pour déboguer un extracteur qui casse
       enabled: false
       retention: 7d
+  catalogue:
+    # import-file: config/catalogue.yml   # profil postgres : importe produits, identifiants et annonces avant la collecte
+    collect-after-import: true

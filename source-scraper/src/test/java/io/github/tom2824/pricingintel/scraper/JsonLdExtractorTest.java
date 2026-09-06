@@ -44,6 +44,16 @@ class JsonLdExtractorTest {
     }
 
     @Test
+    void toleratesRawLineBreaksInsideJsonStrings() {
+        String html = "<script type=\"application/ld+json\">{\"@type\":\"Product\",\"name\":\"Carte\",\"description\":\"ligne 1\nligne 2\","
+                + "\"offers\":{\"@type\":\"Offer\",\"price\":\"894.99\",\"priceCurrency\":\"EUR\"},}</script>";
+
+        assertThat(extractor.extract(org.jsoup.Jsoup.parse(html)))
+                .map(ExtractedOffer::price)
+                .hasValueSatisfying(price -> assertThat(price).isEqualByComparingTo(new BigDecimal("894.99")));
+    }
+
+    @Test
     void returnsEmptyWhenNoProductIsDeclared() {
         assertThat(extractor.extract(Fixtures.page("no-price.html"))).isEmpty();
         assertThat(extractor.extract(Fixtures.page("css-product.html"))).isEmpty();

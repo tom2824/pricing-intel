@@ -108,12 +108,15 @@ public final class CssExtractor implements Extractor {
             selector = selectorSpec.substring(0, at).strip();
             attribute = selectorSpec.substring(at + 2).strip();
         }
-        Element element = document.selectFirst(selector);
-        if (element == null) {
-            return Optional.empty();
+        // Premier élément qui porte une valeur : un site peut rendre un conteneur vide (prix barré absent)
+        // avant le conteneur utile, avec la même classe.
+        for (Element element : document.select(selector)) {
+            String value = attribute == null ? element.text() : element.attr(attribute);
+            if (!value.isBlank()) {
+                return Optional.of(value.strip());
+            }
         }
-        String value = attribute == null ? element.text() : element.attr(attribute);
-        return value.isBlank() ? Optional.empty() : Optional.of(value.strip());
+        return Optional.empty();
     }
 
     private static List<String> lower(List<String> values) {

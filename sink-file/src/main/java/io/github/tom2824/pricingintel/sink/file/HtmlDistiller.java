@@ -25,7 +25,11 @@ import org.jsoup.nodes.TextNode;
  */
 public final class HtmlDistiller {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    /** Lecture tolérante : des sites laissent des retours à la ligne bruts dans les chaînes de leur JSON-LD. */
+    private static final ObjectMapper MAPPER = com.fasterxml.jackson.databind.json.JsonMapper.builder()
+            .enable(com.fasterxml.jackson.core.json.JsonReadFeature.ALLOW_UNESCAPED_CONTROL_CHARS)
+            .enable(com.fasterxml.jackson.core.json.JsonReadFeature.ALLOW_TRAILING_COMMA)
+            .build();
     private static final int MAX_JSON_BLOCKS = 20;
 
     /** Éléments retirés avant rendu : jamais du contenu produit. */

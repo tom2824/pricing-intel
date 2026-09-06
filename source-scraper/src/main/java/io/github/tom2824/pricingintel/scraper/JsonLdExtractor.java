@@ -25,7 +25,11 @@ public final class JsonLdExtractor implements Extractor {
     public static final double CONFIDENCE = 0.95;
 
     private static final Logger LOG = LoggerFactory.getLogger(JsonLdExtractor.class);
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    /** Lecture tolérante : des sites laissent des retours à la ligne bruts dans les chaînes (vu chez Cybertek). */
+    private static final ObjectMapper MAPPER = com.fasterxml.jackson.databind.json.JsonMapper.builder()
+            .enable(com.fasterxml.jackson.core.json.JsonReadFeature.ALLOW_UNESCAPED_CONTROL_CHARS)
+            .enable(com.fasterxml.jackson.core.json.JsonReadFeature.ALLOW_TRAILING_COMMA)
+            .build();
     private static final List<String> NESTING_KEYS = List.of("@graph", "mainEntity", "itemListElement", "item");
     private static final List<String> GTIN_KEYS = List.of("gtin13", "gtin", "gtin14", "gtin12", "gtin8");
 

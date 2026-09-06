@@ -37,6 +37,16 @@ class CssExtractorTest {
     }
 
     @Test
+    void skipsEmptyMatchesAndTakesTheFirstElementWithAValue() {
+        org.jsoup.nodes.Document page = org.jsoup.Jsoup.parse(
+                "<span class='price' id='barre'></span><div><span class='price'>894€<sup>99</sup></span></div>");
+
+        assertThat(ExtractorSpec.Css.price("span.price").build("EUR").extract(page))
+                .map(ExtractedOffer::price)
+                .hasValueSatisfying(price -> assertThat(price).isEqualByComparingTo(new BigDecimal("894.99")));
+    }
+
+    @Test
     void returnsEmptyWhenThePriceSelectorMatchesNothing() {
         assertThat(ExtractorSpec.Css.price(".missing").build("EUR").extract(Fixtures.page("css-product.html"))).isEmpty();
     }

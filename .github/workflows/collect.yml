@@ -5,9 +5,9 @@ name: Collecte
 
 on:
   workflow_dispatch:
-  # Décommenter pour activer la collecte quotidienne (08:00 UTC, soit 10:00 à Paris en été).
-  # schedule:
-  #   - cron: '0 8 * * *'
+  # Collecte quotidienne à 08:00 UTC (10:00 à Paris en été).
+  schedule:
+    - cron: '0 8 * * *'
 
 jobs:
   collect:

@@ -16,7 +16,6 @@ data/
 
 # Config locale (proxy, listings perso)
 config/listings.yml
-config/catalogue.yml
 config/*.local.yml
 
 # OS

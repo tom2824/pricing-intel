@@ -148,11 +148,7 @@ n'importe quel Postgres) : Flyway crée le schéma, les annonces sont lues en ba
 export SPRING_PROFILES_ACTIVE=postgres PRICING_INTEL_DB_URL="jdbc:postgresql://HOST:5432/postgres?sslmode=require" PRICING_INTEL_DB_USER=postgres PRICING_INTEL_DB_PASSWORD=...
 ```
 
-Importer le catalogue (produits, identifiants, annonces et correspondances manuelles) puis collecter :
-
-```bash
-cp config/catalogue.example.yml config/catalogue.yml
-```
+Importer le catalogue de démonstration (produits, identifiants, annonces et correspondances manuelles) puis collecter :
 
 ```bash
 java -jar app-batch/target/app-batch-0.1.0-SNAPSHOT-exec.jar --collector.catalogue.import-file=config/catalogue.yml

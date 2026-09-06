@@ -27,6 +27,14 @@ jobs:
           host=$(echo "$PRICING_INTEL_DB_URL" | sed -E 's#jdbc:postgresql://([^:/]+).*#\1#')
           echo "host=$host"
           psql "host=$host port=5432 dbname=postgres user=$PRICING_INTEL_DB_USER sslmode=require" -c "select current_user, version();" || echo "PSQL FAILED"
+      - name: Data summary (counts, last collection, latest snapshots)
+        run: |
+          host=$(echo "$PRICING_INTEL_DB_URL" | sed -E 's#jdbc:postgresql://([^:/]+).*#\1#')
+          conn="host=$host port=5432 dbname=postgres user=$PRICING_INTEL_DB_USER sslmode=require"
+          psql "$conn" -c "select (select count(*) from product) products, (select count(*) from listing) listings, (select count(*) from listing_match where status='validated' and valid_to is null) matches, (select count(*) from price_snapshot) snapshots, (select count(*) from collection_run) runs, (select count(*) from collection_failure) failures;" || true
+          psql "$conn" -c "select id, started_at, attempted, collected, failed from collection_run order by id desc limit 3;" || true
+          psql "$conn" -c "select l.code, s.observed_date, s.price, s.availability, s.extraction_method, s.quarantine from price_snapshot s join listing l on l.id = s.listing_id order by s.observed_at desc limit 30;" || true
+          psql "$conn" -c "select listing_code, reason from collection_failure order by id desc limit 15;" || true
       - name: Try psql with a trimmed password (in case of a stray newline)
         run: |
           host=$(echo "$PRICING_INTEL_DB_URL" | sed -E 's#jdbc:postgresql://([^:/]+).*#\1#')

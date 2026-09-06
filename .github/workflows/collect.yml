@@ -35,8 +35,10 @@ jobs:
         # Mode postgres : les annonces viennent de la base, alimentée par l'import du catalogue.
         run: |
           if [ ! -f config/listings.yml ]; then cp config/listings.example.yml config/listings.yml; fi
+          extra=""
+          if [ -n "$SPRING_PROFILES_ACTIVE" ]; then extra="--collector.catalogue.import-file=config/catalogue.yml"; fi
           java -jar app-batch/target/app-batch-*-exec.jar \
-            --collector.sinks.jsonl-file=data/releves-${{ github.run_id }}.jsonl
+            --collector.sinks.jsonl-file=data/releves-${{ github.run_id }}.jsonl $extra
 
       - name: Publish collected snapshots
         if: always()

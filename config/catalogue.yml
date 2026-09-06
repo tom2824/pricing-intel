@@ -1,0 +1,140 @@
+# Catalogue de démonstration (ADR 0015, 0016), importé à chaque collecte sous le profil postgres :
+#   java -jar app-batch/target/app-batch-*-exec.jar --collector.catalogue.import-file=config/catalogue.yml
+# L'import est idempotent : un produit est reconnu par sa clé naturelle, une annonce par son code.
+# Ce fichier est public : il ne contient que des références produit et des URL de fiches.
+#
+# Trois segments, trois marques par segment, relevés sur LDLC, TopAchat et Materiel.net (septembre 2026).
+# GTIN et références fabricant relevés dans le JSON-LD des fiches LDLC. Les prix d'achat sont fictifs.
+
+products:
+  # ---- GPU : segment GeForce RTX 5070 12 Go GDDR7 ------------------------------------------------------
+  - key: rtx5070-msi-ventus-2x-oc
+    family: gpu
+    brand: MSI
+    mpn: G5070-12V2C
+    name: MSI GeForce RTX 5070 12G VENTUS 2X OC
+    attributes: {chipset: RTX 5070, vram_gb: 12, variant: Ventus 2X OC, tdp_w: 250}
+    identifiers:
+      - {scheme: gtin, value: "4711377308229"}
+    purchasePrice: 820
+    currentPrice: 969.99
+
+  - key: rtx5070-gigabyte-windforce-oc-sff
+    family: gpu
+    brand: Gigabyte
+    mpn: GV-N5070WF3OC-12GD
+    name: Gigabyte GeForce RTX 5070 WINDFORCE OC SFF 12G
+    attributes: {chipset: RTX 5070, vram_gb: 12, variant: Windforce OC SFF, tdp_w: 250}
+    identifiers:
+      - {scheme: gtin, value: "4719331355715"}
+    purchasePrice: 800
+    currentPrice: 949.99
+
+  - key: rtx5070-asus-dual-oc
+    family: gpu
+    brand: ASUS
+    mpn: DUAL-RTX5070-O12G
+    name: ASUS Dual GeForce RTX 5070 12GB GDDR7 OC Edition
+    attributes: {chipset: RTX 5070, vram_gb: 12, variant: Dual OC, tdp_w: 250}
+    identifiers:
+      - {scheme: gtin, value: "4711636046213"}
+    purchasePrice: 800
+    currentPrice: 949.99
+
+  # ---- SSD : segment 2 To PCIe 4.0 NVMe M.2 2280 ---------------------------------------------------------
+  - key: ssd-samsung-990-pro-2to
+    family: ssd
+    brand: Samsung
+    mpn: MZ-V9P2T0BW
+    name: Samsung SSD 990 PRO M.2 PCIe NVMe 2 To
+    attributes: {capacity_gb: 2000, interface: PCIe 4.0 NVMe, form_factor: M.2 2280, heatsink: false, read_mbps: 7450}
+    identifiers:
+      - {scheme: gtin, value: "8806094215038"}
+    purchasePrice: 400
+    currentPrice: 489.99
+
+  - key: ssd-crucial-p310-2to
+    family: ssd
+    brand: Crucial
+    mpn: CT2000P310SSD8
+    name: Crucial P310 2 To M.2 2280 PCIe 4.0 NVMe
+    attributes: {capacity_gb: 2000, interface: PCIe 4.0 NVMe, form_factor: M.2 2280, heatsink: false, read_mbps: 7100}
+    identifiers:
+      - {scheme: gtin, value: "0649528942241"}
+    purchasePrice: 270
+    currentPrice: 329.99
+
+  - key: ssd-corsair-mp600-pro-lpx-2to
+    family: ssd
+    brand: Corsair
+    mpn: CSSD-F2000GBMP600PLP
+    name: Corsair MP600 PRO LPX 2 To
+    attributes: {capacity_gb: 2000, interface: PCIe 4.0 NVMe, form_factor: M.2 2280, heatsink: true, read_mbps: 7100}
+    identifiers:
+      - {scheme: gtin, value: "0840006657798"}
+    purchasePrice: 360
+    currentPrice: 439.99
+
+  # ---- RAM : segment DDR5 32 Go (2 x 16 Go) 6000 MT/s CL30 -----------------------------------------------
+  - key: ram-kingston-fury-beast-32-6000-cl30
+    family: ram
+    brand: Kingston
+    mpn: KF560C30BBEK2-32
+    name: Kingston FURY Beast 32 Go (2 x 16 Go) DDR5 6000 MHz CL30
+    attributes: {capacity_gb: 32, type: DDR5, speed_mts: 6000, cas_latency: 30, kit: 2x16, rgb: false}
+    identifiers:
+      - {scheme: gtin, value: "0740617342994"}
+    purchasePrice: 540
+    currentPrice: 649.99
+
+  - key: ram-corsair-vengeance-32-6000-cl30
+    family: ram
+    brand: Corsair
+    mpn: CMK32GX5M2B6000Z30
+    name: Corsair Vengeance DDR5 32 Go (2 x 16 Go) 6000 MHz CL30 - Gris
+    attributes: {capacity_gb: 32, type: DDR5, speed_mts: 6000, cas_latency: 30, kit: 2x16, rgb: false}
+    identifiers:
+      - {scheme: gtin, value: "0840006673293"}
+    purchasePrice: 540
+    currentPrice: 659.99
+
+  - key: ram-gskill-flare-x5-32-6000-cl30
+    family: ram
+    brand: G.Skill
+    mpn: F5-6000J3038F16GX2-FX5
+    name: G.Skill Flare X5 Low Profile 32 Go (2 x 16 Go) DDR5 6000 MHz CL30
+    attributes: {capacity_gb: 32, type: DDR5, speed_mts: 6000, cas_latency: 30, kit: 2x16, rgb: false}
+    identifiers:
+      - {scheme: gtin, value: "4713294230539"}
+    purchasePrice: 600
+    currentPrice: 739.99
+
+listings:
+  # ---- GPU
+  - {code: ldlc-rtx5070-msi-ventus,            product: rtx5070-msi-ventus-2x-oc,          source: ldlc,         url: "https://www.ldlc.com/fiche/PB00668546.html"}
+  - {code: materielnet-rtx5070-msi-ventus,     product: rtx5070-msi-ventus-2x-oc,          source: materiel-net, url: "https://www.materiel.net/produit/202502180051.html"}
+  - {code: topachat-rtx5070-msi-ventus,        product: rtx5070-msi-ventus-2x-oc,          source: topachat,     url: "https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_wgfx_pcie_puis_ref_est_in20027452.html"}
+  - {code: ldlc-rtx5070-gigabyte-windforce,    product: rtx5070-gigabyte-windforce-oc-sff, source: ldlc,         url: "https://www.ldlc.com/fiche/PB00671172.html"}
+  - {code: materielnet-rtx5070-gigabyte-windforce, product: rtx5070-gigabyte-windforce-oc-sff, source: materiel-net, url: "https://www.materiel.net/produit/202503030098.html"}
+  - {code: topachat-rtx5070-gigabyte-windforce, product: rtx5070-gigabyte-windforce-oc-sff, source: topachat,    url: "https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_wgfx_pcie_puis_ref_est_in20027610.html"}
+  - {code: ldlc-rtx5070-asus-dual,             product: rtx5070-asus-dual-oc,              source: ldlc,         url: "https://www.ldlc.com/fiche/PB00689546.html"}
+  - {code: materielnet-rtx5070-asus-dual,      product: rtx5070-asus-dual-oc,              source: materiel-net, url: "https://www.materiel.net/produit/202506100043.html"}
+  - {code: topachat-rtx5070-asus-dual,         product: rtx5070-asus-dual-oc,              source: topachat,     url: "https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_wgfx_pcie_puis_ref_est_in20028773.html"}
+  # ---- SSD
+  - {code: ldlc-ssd-990-pro-2to,               product: ssd-samsung-990-pro-2to,           source: ldlc,         url: "https://www.ldlc.com/fiche/PB00512964.html"}
+  - {code: materielnet-ssd-990-pro-2to,        product: ssd-samsung-990-pro-2to,           source: materiel-net, url: "https://www.materiel.net/produit/202208170009.html"}
+  - {code: topachat-ssd-990-pro-2to,           product: ssd-samsung-990-pro-2to,           source: topachat,     url: "https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_w_ssd_puis_ref_est_in20014575.html"}
+  - {code: ldlc-ssd-p310-2to,                  product: ssd-crucial-p310-2to,              source: ldlc,         url: "https://www.ldlc.com/fiche/PB00644137.html"}
+  - {code: materielnet-ssd-p310-2to,           product: ssd-crucial-p310-2to,              source: materiel-net, url: "https://www.materiel.net/produit/202409160076.html"}
+  - {code: topachat-ssd-p310-2to,              product: ssd-crucial-p310-2to,              source: topachat,     url: "https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_w_ssd_puis_ref_est_in20024890.html"}
+  - {code: ldlc-ssd-mp600-pro-lpx-2to,         product: ssd-corsair-mp600-pro-lpx-2to,     source: ldlc,         url: "https://www.ldlc.com/fiche/PB00482458.html"}
+  - {code: materielnet-ssd-mp600-pro-lpx-2to,  product: ssd-corsair-mp600-pro-lpx-2to,     source: materiel-net, url: "https://www.materiel.net/produit/202201100281.html"}
+  - {code: topachat-ssd-mp600-pro-lpx-2to,     product: ssd-corsair-mp600-pro-lpx-2to,     source: topachat,     url: "https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_w_ssd_puis_ref_est_in20012315.html"}
+  # ---- RAM (Corsair CL30 et G.Skill Flare X5 2x16 CL30 ne sont pas au catalogue TopAchat : deux sources)
+  - {code: ldlc-ram-fury-beast-32-6000,        product: ram-kingston-fury-beast-32-6000-cl30, source: ldlc,      url: "https://www.ldlc.com/fiche/PB00654376.html"}
+  - {code: materielnet-ram-fury-beast-32-6000, product: ram-kingston-fury-beast-32-6000-cl30, source: materiel-net, url: "https://www.materiel.net/produit/202411130035.html"}
+  - {code: topachat-ram-fury-beast-32-6000,    product: ram-kingston-fury-beast-32-6000-cl30, source: topachat,  url: "https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_wme_ddr5_puis_ref_est_in20025862.html"}
+  - {code: ldlc-ram-vengeance-32-6000-cl30,    product: ram-corsair-vengeance-32-6000-cl30, source: ldlc,        url: "https://www.ldlc.com/fiche/PB00563927.html"}
+  - {code: materielnet-ram-vengeance-32-6000-cl30, product: ram-corsair-vengeance-32-6000-cl30, source: materiel-net, url: "https://www.materiel.net/produit/202307170088.html"}
+  - {code: ldlc-ram-flare-x5-32-6000-cl30,     product: ram-gskill-flare-x5-32-6000-cl30,  source: ldlc,         url: "https://www.ldlc.com/fiche/PB00548235.html"}
+  - {code: materielnet-ram-flare-x5-32-6000-cl30, product: ram-gskill-flare-x5-32-6000-cl30, source: materiel-net, url: "https://www.materiel.net/produit/202303280143.html"}

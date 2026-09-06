@@ -1,0 +1,33 @@
+# Diagnostic de connexion à la base (workflow_dispatch). N'affiche jamais les valeurs des secrets :
+# seulement la longueur du mot de passe, la présence d'espaces ou de fins de ligne, et le résultat de psql.
+name: Diagnostic base
+
+on:
+  workflow_dispatch:
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      PRICING_INTEL_DB_URL: ${{ secrets.PRICING_INTEL_DB_URL }}
+      PRICING_INTEL_DB_USER: ${{ secrets.PRICING_INTEL_DB_USER }}
+      PGPASSWORD: ${{ secrets.PRICING_INTEL_DB_PASSWORD }}
+    steps:
+      - name: Inspect secrets shape (values never printed)
+        run: |
+          echo "url=$PRICING_INTEL_DB_URL"
+          echo "user=$PRICING_INTEL_DB_USER"
+          echo "password bytes: $(printf '%s' "$PGPASSWORD" | wc -c)"
+          echo "password whitespace chars: $(printf '%s' "$PGPASSWORD" | tr -cd '[:space:]' | wc -c)"
+          echo "password ends with CR or LF: $(printf '%s' "$PGPASSWORD" | tail -c1 | od -An -c | grep -cE '\r|\n')"
+          echo "password starts/ends with space: $(printf '%s' "$PGPASSWORD" | grep -cE '^ | $')"
+      - name: Try psql through the session pooler
+        run: |
+          host=$(echo "$PRICING_INTEL_DB_URL" | sed -E 's#jdbc:postgresql://([^:/]+).*#\1#')
+          echo "host=$host"
+          psql "host=$host port=5432 dbname=postgres user=$PRICING_INTEL_DB_USER sslmode=require" -c "select current_user, version();" || echo "PSQL FAILED"
+      - name: Try psql with a trimmed password (in case of a stray newline)
+        run: |
+          host=$(echo "$PRICING_INTEL_DB_URL" | sed -E 's#jdbc:postgresql://([^:/]+).*#\1#')
+          PGPASSWORD="$(printf '%s' "$PGPASSWORD" | tr -d '\r\n' | sed -E 's/^ +| +$//g')" psql "host=$host port=5432 dbname=postgres user=$PRICING_INTEL_DB_USER sslmode=require" -c "select 'trimmed password works' as result;" || echo "TRIMMED PSQL FAILED"

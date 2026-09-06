@@ -1,0 +1,13 @@
+# Cybertek (groupe indépendant de LDLC/Materiel.net, ADR 0019). La plupart des fiches ont un JSON-LD Product
+# avec gtin13 et mpn ; certaines n'en ont pas, d'où le repli CSS, vérifié sur une vraie fiche (septembre 2026) :
+# prix au format "129€99" dans span.fiche_product_price, disponibilité "En Stock" / "Pas de stock" dans .prodfiche_dispo.
+id: cybertek
+host: "*.cybertek.fr"
+extractors:
+  - type: jsonld
+  - type: css
+    price: "span.fiche_product_price"
+    availability: "div.prodfiche_dispo"
+    inStock: ["en stock", "en livraison", "dispo"]
+    outOfStock: ["pas de stock", "rupture", "indisponible", "épuisé"]
+    title: "h1"

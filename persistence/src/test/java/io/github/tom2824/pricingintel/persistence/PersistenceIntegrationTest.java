@@ -58,8 +58,8 @@ class PersistenceIntegrationTest {
     @Test
     @Order(1)
     void migrationsSeedFamiliesAndSources() {
-        assertThat(jdbc.sql("select count(*) from product_family").query(Long.class).single()).isEqualTo(4L);
-        assertThat(jdbc.sql("select count(*) from source").query(Long.class).single()).isEqualTo(4L);
+        assertThat(jdbc.sql("select count(*) from product_family").query(Long.class).single()).isEqualTo(5L);
+        assertThat(jdbc.sql("select count(*) from source").query(Long.class).single()).isEqualTo(5L);
     }
 
     @Test

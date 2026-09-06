@@ -1,13 +1,13 @@
-# Catalogue de démonstration (ADR 0015, 0016), importé à chaque collecte sous le profil postgres :
+# Catalogue de démonstration (ADR 0015, 0016, 0019), importé à chaque collecte sous le profil postgres :
 #   java -jar app-batch/target/app-batch-*-exec.jar --collector.catalogue.import-file=config/catalogue.yml
 # L'import est idempotent : un produit est reconnu par sa clé naturelle, une annonce par son code.
 # Ce fichier est public : il ne contient que des références produit et des URL de fiches.
 #
-# Trois segments, trois marques par segment, relevés sur LDLC, TopAchat et Materiel.net (septembre 2026).
-# GTIN et références fabricant relevés dans le JSON-LD des fiches LDLC. Les prix d'achat sont fictifs.
+# Quatre segments, relevés sur LDLC, TopAchat, Materiel.net et Cybertek (septembre 2026).
+# GTIN et références fabricant relevés dans le JSON-LD des fiches. Les prix d'achat sont fictifs.
 
 products:
-  # ---- GPU : segment GeForce RTX 5070 12 Go GDDR7 ------------------------------------------------------
+  # ---- GPU : segment GeForce RTX 5070 12 Go GDDR7, cinq cartes, trois marques ----------------------------
   - key: rtx5070-msi-ventus-2x-oc
     family: gpu
     brand: MSI
@@ -18,6 +18,17 @@ products:
       - {scheme: gtin, value: "4711377308229"}
     purchasePrice: 820
     currentPrice: 969.99
+
+  - key: rtx5070-msi-gaming-trio-oc
+    family: gpu
+    brand: MSI
+    mpn: G5070-12GTC
+    name: MSI GeForce RTX 5070 12G GAMING TRIO OC
+    attributes: {chipset: RTX 5070, vram_gb: 12, variant: Gaming Trio OC, tdp_w: 250}
+    identifiers:
+      - {scheme: gtin, value: "4711377303927"}
+    purchasePrice: 830
+    currentPrice: 979.99
 
   - key: rtx5070-gigabyte-windforce-oc-sff
     family: gpu
@@ -38,6 +49,17 @@ products:
     attributes: {chipset: RTX 5070, vram_gb: 12, variant: Dual OC, tdp_w: 250}
     identifiers:
       - {scheme: gtin, value: "4711636046213"}
+    purchasePrice: 800
+    currentPrice: 949.99
+
+  - key: rtx5070-asus-prime-oc
+    family: gpu
+    brand: ASUS
+    mpn: PRIME-RTX5070-O12G
+    name: ASUS PRIME GeForce RTX 5070 12GB GDDR7 OC Edition
+    attributes: {chipset: RTX 5070, vram_gb: 12, variant: Prime OC, tdp_w: 250}
+    identifiers:
+      - {scheme: gtin, value: "4711387837825"}
     purchasePrice: 800
     currentPrice: 949.99
 
@@ -109,32 +131,90 @@ products:
     purchasePrice: 600
     currentPrice: 739.99
 
+  # ---- PSU : segment 850 W 80+ Gold modulaire (la marque pèse peu, les écarts sont nets) ----------------
+  - key: psu-corsair-rm850e-2025
+    family: psu
+    brand: Corsair
+    mpn: CP-9020296-EU
+    name: Corsair RM850e (2025)
+    attributes: {wattage_w: 850, atx_version: ATX 3.1, efficiency: 80+ Gold, modular: modulaire, color: noir, fan_mm: 120, pcie_5_12v: 1}
+    identifiers:
+      - {scheme: gtin, value: "0840006691204"}
+    purchasePrice: 100
+    currentPrice: 129.99
+
+  - key: psu-msi-mag-a850gl-pcie5
+    family: psu
+    brand: MSI
+    mpn: 306-7ZP8A11-CE0
+    name: MSI MAG A850GL PCIE5
+    attributes: {wattage_w: 850, atx_version: ATX 3.0, efficiency: 80+ Gold, modular: modulaire, color: noir, fan_mm: 120, pcie_5_12v: 1}
+    identifiers:
+      - {scheme: gtin, value: "4711377084253"}
+    purchasePrice: 75
+    currentPrice: 99.99
+
+  - key: psu-seasonic-focus-gx-850-v4
+    family: psu
+    brand: Seasonic
+    mpn: FOCUS-GX-850-V4
+    name: Seasonic FOCUS GX-850 ATX 3 (2024)
+    attributes: {wattage_w: 850, atx_version: ATX 3.1, efficiency: 80+ Gold, modular: modulaire, color: noir, fan_mm: 120, pcie_5_12v: 1}
+    identifiers:
+      - {scheme: gtin, value: "4711173878438"}
+    purchasePrice: 140
+    currentPrice: 179.99
+
 listings:
   # ---- GPU
-  - {code: ldlc-rtx5070-msi-ventus,            product: rtx5070-msi-ventus-2x-oc,          source: ldlc,         url: "https://www.ldlc.com/fiche/PB00668546.html"}
-  - {code: materielnet-rtx5070-msi-ventus,     product: rtx5070-msi-ventus-2x-oc,          source: materiel-net, url: "https://www.materiel.net/produit/202502180051.html"}
-  - {code: topachat-rtx5070-msi-ventus,        product: rtx5070-msi-ventus-2x-oc,          source: topachat,     url: "https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_wgfx_pcie_puis_ref_est_in20027452.html"}
-  - {code: ldlc-rtx5070-gigabyte-windforce,    product: rtx5070-gigabyte-windforce-oc-sff, source: ldlc,         url: "https://www.ldlc.com/fiche/PB00671172.html"}
+  - {code: ldlc-rtx5070-msi-ventus,                product: rtx5070-msi-ventus-2x-oc,          source: ldlc,         url: "https://www.ldlc.com/fiche/PB00668546.html"}
+  - {code: materielnet-rtx5070-msi-ventus,         product: rtx5070-msi-ventus-2x-oc,          source: materiel-net, url: "https://www.materiel.net/produit/202502180051.html"}
+  - {code: topachat-rtx5070-msi-ventus,            product: rtx5070-msi-ventus-2x-oc,          source: topachat,     url: "https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_wgfx_pcie_puis_ref_est_in20027452.html"}
+  - {code: cybertek-rtx5070-msi-ventus,            product: rtx5070-msi-ventus-2x-oc,          source: cybertek,     url: "https://www.cybertek.fr/carte-graphique/msi-geforce-rtx-5070-12g-ventus-2x-oc-151358.aspx"}
+  - {code: ldlc-rtx5070-msi-gaming-trio,           product: rtx5070-msi-gaming-trio-oc,        source: ldlc,         url: "https://www.ldlc.com/fiche/PB00668553.html"}
+  - {code: materielnet-rtx5070-msi-gaming-trio,    product: rtx5070-msi-gaming-trio-oc,        source: materiel-net, url: "https://www.materiel.net/produit/202502180049.html"}
+  - {code: topachat-rtx5070-msi-gaming-trio,       product: rtx5070-msi-gaming-trio-oc,        source: topachat,     url: "https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_wgfx_pcie_puis_ref_est_in20027450.html"}
+  - {code: cybertek-rtx5070-msi-gaming-trio,       product: rtx5070-msi-gaming-trio-oc,        source: cybertek,     url: "https://www.cybertek.fr/carte-graphique/msi-geforce-rtx-5070-12g-gaming-trio-oc-151356.aspx"}
+  - {code: ldlc-rtx5070-gigabyte-windforce,        product: rtx5070-gigabyte-windforce-oc-sff, source: ldlc,         url: "https://www.ldlc.com/fiche/PB00671172.html"}
   - {code: materielnet-rtx5070-gigabyte-windforce, product: rtx5070-gigabyte-windforce-oc-sff, source: materiel-net, url: "https://www.materiel.net/produit/202503030098.html"}
-  - {code: topachat-rtx5070-gigabyte-windforce, product: rtx5070-gigabyte-windforce-oc-sff, source: topachat,    url: "https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_wgfx_pcie_puis_ref_est_in20027610.html"}
-  - {code: ldlc-rtx5070-asus-dual,             product: rtx5070-asus-dual-oc,              source: ldlc,         url: "https://www.ldlc.com/fiche/PB00689546.html"}
-  - {code: materielnet-rtx5070-asus-dual,      product: rtx5070-asus-dual-oc,              source: materiel-net, url: "https://www.materiel.net/produit/202506100043.html"}
-  - {code: topachat-rtx5070-asus-dual,         product: rtx5070-asus-dual-oc,              source: topachat,     url: "https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_wgfx_pcie_puis_ref_est_in20028773.html"}
+  - {code: topachat-rtx5070-gigabyte-windforce,    product: rtx5070-gigabyte-windforce-oc-sff, source: topachat,     url: "https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_wgfx_pcie_puis_ref_est_in20027610.html"}
+  - {code: cybertek-rtx5070-gigabyte-windforce,    product: rtx5070-gigabyte-windforce-oc-sff, source: cybertek,     url: "https://www.cybertek.fr/carte-graphique/gigabyte-geforce-rtx-5070-windforce-oc-sff-12g-151718.aspx"}
+  - {code: ldlc-rtx5070-asus-dual,                 product: rtx5070-asus-dual-oc,              source: ldlc,         url: "https://www.ldlc.com/fiche/PB00689546.html"}
+  - {code: materielnet-rtx5070-asus-dual,          product: rtx5070-asus-dual-oc,              source: materiel-net, url: "https://www.materiel.net/produit/202506100043.html"}
+  - {code: topachat-rtx5070-asus-dual,             product: rtx5070-asus-dual-oc,              source: topachat,     url: "https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_wgfx_pcie_puis_ref_est_in20028773.html"}
+  - {code: cybertek-rtx5070-asus-dual,             product: rtx5070-asus-dual-oc,              source: cybertek,     url: "https://www.cybertek.fr/carte-graphique/asus-dual-geforce-rtx-5070-12gb-gddr7-154213.aspx"}
+  - {code: ldlc-rtx5070-asus-prime,                product: rtx5070-asus-prime-oc,             source: ldlc,         url: "https://www.ldlc.com/fiche/PB00669231.html"}
+  - {code: materielnet-rtx5070-asus-prime,         product: rtx5070-asus-prime-oc,             source: materiel-net, url: "https://www.materiel.net/produit/202502210013.html"}
+  - {code: cybertek-rtx5070-asus-prime,            product: rtx5070-asus-prime-oc,             source: cybertek,     url: "https://www.cybertek.fr/carte-graphique/asus-prime-geforce-rtx-5070-12gb-gddr7-oc-edition-151450.aspx"}
   # ---- SSD
-  - {code: ldlc-ssd-990-pro-2to,               product: ssd-samsung-990-pro-2to,           source: ldlc,         url: "https://www.ldlc.com/fiche/PB00512964.html"}
-  - {code: materielnet-ssd-990-pro-2to,        product: ssd-samsung-990-pro-2to,           source: materiel-net, url: "https://www.materiel.net/produit/202208170009.html"}
-  - {code: topachat-ssd-990-pro-2to,           product: ssd-samsung-990-pro-2to,           source: topachat,     url: "https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_w_ssd_puis_ref_est_in20014575.html"}
-  - {code: ldlc-ssd-p310-2to,                  product: ssd-crucial-p310-2to,              source: ldlc,         url: "https://www.ldlc.com/fiche/PB00644137.html"}
-  - {code: materielnet-ssd-p310-2to,           product: ssd-crucial-p310-2to,              source: materiel-net, url: "https://www.materiel.net/produit/202409160076.html"}
-  - {code: topachat-ssd-p310-2to,              product: ssd-crucial-p310-2to,              source: topachat,     url: "https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_w_ssd_puis_ref_est_in20024890.html"}
-  - {code: ldlc-ssd-mp600-pro-lpx-2to,         product: ssd-corsair-mp600-pro-lpx-2to,     source: ldlc,         url: "https://www.ldlc.com/fiche/PB00482458.html"}
-  - {code: materielnet-ssd-mp600-pro-lpx-2to,  product: ssd-corsair-mp600-pro-lpx-2to,     source: materiel-net, url: "https://www.materiel.net/produit/202201100281.html"}
-  - {code: topachat-ssd-mp600-pro-lpx-2to,     product: ssd-corsair-mp600-pro-lpx-2to,     source: topachat,     url: "https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_w_ssd_puis_ref_est_in20012315.html"}
-  # ---- RAM (Corsair CL30 et G.Skill Flare X5 2x16 CL30 ne sont pas au catalogue TopAchat : deux sources)
-  - {code: ldlc-ram-fury-beast-32-6000,        product: ram-kingston-fury-beast-32-6000-cl30, source: ldlc,      url: "https://www.ldlc.com/fiche/PB00654376.html"}
-  - {code: materielnet-ram-fury-beast-32-6000, product: ram-kingston-fury-beast-32-6000-cl30, source: materiel-net, url: "https://www.materiel.net/produit/202411130035.html"}
-  - {code: topachat-ram-fury-beast-32-6000,    product: ram-kingston-fury-beast-32-6000-cl30, source: topachat,  url: "https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_wme_ddr5_puis_ref_est_in20025862.html"}
-  - {code: ldlc-ram-vengeance-32-6000-cl30,    product: ram-corsair-vengeance-32-6000-cl30, source: ldlc,        url: "https://www.ldlc.com/fiche/PB00563927.html"}
+  - {code: ldlc-ssd-990-pro-2to,                   product: ssd-samsung-990-pro-2to,           source: ldlc,         url: "https://www.ldlc.com/fiche/PB00512964.html"}
+  - {code: materielnet-ssd-990-pro-2to,            product: ssd-samsung-990-pro-2to,           source: materiel-net, url: "https://www.materiel.net/produit/202208170009.html"}
+  - {code: topachat-ssd-990-pro-2to,               product: ssd-samsung-990-pro-2to,           source: topachat,     url: "https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_w_ssd_puis_ref_est_in20014575.html"}
+  - {code: cybertek-ssd-990-pro-2to,               product: ssd-samsung-990-pro-2to,           source: cybertek,     url: "https://www.cybertek.fr/disque-ssd/samsung-990-pro-2to-m-2-126728.aspx"}
+  - {code: ldlc-ssd-p310-2to,                      product: ssd-crucial-p310-2to,              source: ldlc,         url: "https://www.ldlc.com/fiche/PB00644137.html"}
+  - {code: materielnet-ssd-p310-2to,               product: ssd-crucial-p310-2to,              source: materiel-net, url: "https://www.materiel.net/produit/202409160076.html"}
+  - {code: topachat-ssd-p310-2to,                  product: ssd-crucial-p310-2to,              source: topachat,     url: "https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_w_ssd_puis_ref_est_in20024890.html"}
+  - {code: ldlc-ssd-mp600-pro-lpx-2to,             product: ssd-corsair-mp600-pro-lpx-2to,     source: ldlc,         url: "https://www.ldlc.com/fiche/PB00482458.html"}
+  - {code: materielnet-ssd-mp600-pro-lpx-2to,      product: ssd-corsair-mp600-pro-lpx-2to,     source: materiel-net, url: "https://www.materiel.net/produit/202201100281.html"}
+  - {code: topachat-ssd-mp600-pro-lpx-2to,         product: ssd-corsair-mp600-pro-lpx-2to,     source: topachat,     url: "https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_w_ssd_puis_ref_est_in20012315.html"}
+  # ---- RAM
+  - {code: ldlc-ram-fury-beast-32-6000,            product: ram-kingston-fury-beast-32-6000-cl30, source: ldlc,         url: "https://www.ldlc.com/fiche/PB00654376.html"}
+  - {code: materielnet-ram-fury-beast-32-6000,     product: ram-kingston-fury-beast-32-6000-cl30, source: materiel-net, url: "https://www.materiel.net/produit/202411130035.html"}
+  - {code: topachat-ram-fury-beast-32-6000,        product: ram-kingston-fury-beast-32-6000-cl30, source: topachat,     url: "https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_wme_ddr5_puis_ref_est_in20025862.html"}
+  - {code: cybertek-ram-fury-beast-32-6000,        product: ram-kingston-fury-beast-32-6000-cl30, source: cybertek,     url: "https://www.cybertek.fr/memoire-pc/kingston-fury-beast-32go-2x16go-ddr5-6000mhz-cl30-143680.aspx"}
+  - {code: ldlc-ram-vengeance-32-6000-cl30,        product: ram-corsair-vengeance-32-6000-cl30, source: ldlc,         url: "https://www.ldlc.com/fiche/PB00563927.html"}
   - {code: materielnet-ram-vengeance-32-6000-cl30, product: ram-corsair-vengeance-32-6000-cl30, source: materiel-net, url: "https://www.materiel.net/produit/202307170088.html"}
-  - {code: ldlc-ram-flare-x5-32-6000-cl30,     product: ram-gskill-flare-x5-32-6000-cl30,  source: ldlc,         url: "https://www.ldlc.com/fiche/PB00548235.html"}
-  - {code: materielnet-ram-flare-x5-32-6000-cl30, product: ram-gskill-flare-x5-32-6000-cl30, source: materiel-net, url: "https://www.materiel.net/produit/202303280143.html"}
+  - {code: ldlc-ram-flare-x5-32-6000-cl30,         product: ram-gskill-flare-x5-32-6000-cl30,  source: ldlc,         url: "https://www.ldlc.com/fiche/PB00548235.html"}
+  - {code: materielnet-ram-flare-x5-32-6000-cl30,  product: ram-gskill-flare-x5-32-6000-cl30,  source: materiel-net, url: "https://www.materiel.net/produit/202303280143.html"}
+  # ---- PSU
+  - {code: ldlc-psu-rm850e-2025,                   product: psu-corsair-rm850e-2025,           source: ldlc,         url: "https://www.ldlc.com/fiche/PB00663406.html"}
+  - {code: materielnet-psu-rm850e-2025,            product: psu-corsair-rm850e-2025,           source: materiel-net, url: "https://www.materiel.net/produit/202412050101.html"}
+  - {code: topachat-psu-rm850e-2025,               product: psu-corsair-rm850e-2025,           source: topachat,     url: "https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_w_ali_puis_ref_est_in20026414.html"}
+  - {code: cybertek-psu-rm850e-2025,               product: psu-corsair-rm850e-2025,           source: cybertek,     url: "https://www.cybertek.fr/alimentation/corsair-atx-850w-rm850e-gold-fmod-atx-3-1-pcie5-1-149441.aspx"}
+  - {code: ldlc-psu-mag-a850gl,                    product: psu-msi-mag-a850gl-pcie5,          source: ldlc,         url: "https://www.ldlc.com/fiche/PB00562324.html"}
+  - {code: materielnet-psu-mag-a850gl,             product: psu-msi-mag-a850gl-pcie5,          source: materiel-net, url: "https://www.materiel.net/produit/202307110021.html"}
+  - {code: topachat-psu-mag-a850gl,                product: psu-msi-mag-a850gl-pcie5,          source: topachat,     url: "https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_w_ali_puis_ref_est_in20019375.html"}
+  - {code: cybertek-psu-mag-a850gl,                product: psu-msi-mag-a850gl-pcie5,          source: cybertek,     url: "https://www.cybertek.fr/alimentation/msi-mag-a850gl-pci-e-5-noir-80-gold-full-modulaire-134710.aspx"}
+  - {code: ldlc-psu-focus-gx-850-v4,               product: psu-seasonic-focus-gx-850-v4,      source: ldlc,         url: "https://www.ldlc.com/fiche/PB00647652.html"}
+  - {code: materielnet-psu-focus-gx-850-v4,        product: psu-seasonic-focus-gx-850-v4,      source: materiel-net, url: "https://www.materiel.net/produit/202409020020.html"}
+  - {code: cybertek-psu-focus-gx-850-v4,           product: psu-seasonic-focus-gx-850-v4,      source: cybertek,     url: "https://www.cybertek.fr/alimentation/seasonic-atx-850w-80-gold-focus-gx-850-v4-147671.aspx"}

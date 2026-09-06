@@ -1,10 +1,10 @@
 # Pricing Intel
 
-Veille tarifaire multi-sources et moteur de recommandation de prix, appliqués aux jeux vidéo et aux composants PC.
+Veille tarifaire multi-sources et moteur de recommandation de prix, appliqués aux composants PC.
 Un produit, N sources, un historique fiable, puis un prix proposé selon la stratégie choisie, avec son explication.
 
 État : **collecte par scraping** et **persistance PostgreSQL** (catalogue, correspondances, relevés quotidiens avec
-quarantaine, échecs de collecte) livrées. Viennent ensuite la source API pour les jeux, l'analyse de marché,
+quarantaine, échecs de collecte) livrées, collecte quotidienne réelle sur quatre enseignes (LDLC, TopAchat, Materiel.net, Cybertek). Viennent ensuite l'analyse de marché,
 le moteur de stratégies et l'API de lecture.
 
 Les choix d'architecture sont documentés dans [docs/adr](docs/adr/README.md), la démarche dans
@@ -20,7 +20,7 @@ vérifiées par ArchUnit à chaque build.
 flowchart LR
     subgraph adapters_in [Sources]
         scraper[source-scraper<br/>YAML sites · JSON-LD → JSON embarqué → CSS]
-        api[source-cheapshark<br/>à venir]
+        api[source API<br/>port prêt, aucune prévue (ADR 0019)]
     end
     subgraph core [Cœur]
         domain[domain<br/>Listing · PriceSnapshot · Money]
@@ -167,8 +167,8 @@ pas de proxy par défaut, pas d'appel aux API internes des sites. Détails et ra
 
 ## Feuille de route
 
-1. Base Supabase branchée, cron GitHub Actions actif, premier vrai relevé
-2. Source API pour les jeux (CheapShark, puis IsThereAnyDeal)
+1. ~~Base Supabase branchée, cron GitHub Actions actif, premier vrai relevé~~ fait
+2. ~~Quatrième source et quatrième segment (ADR 0019)~~ fait
 3. Analyse de marché : min, médiane, index, exclusion des hors-stock et des aberrants
 4. Moteur de stratégies avec explication (alignement, undercut, index cible, marge cible, suivi d'un leader ;
    règles transverses : plancher, plafond, arrondi ,99, variation max par jour)

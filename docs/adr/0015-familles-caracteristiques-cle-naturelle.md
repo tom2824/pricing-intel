@@ -53,3 +53,12 @@ Option 4.
   contrainte d'unicité empêche que la correction crée un doublon.
 - Les valeurs de caractéristiques seront stockées en JSONB avec validation applicative contre le schéma de la
   famille, plutôt qu'une table par famille : le catalogue est ouvert, le schéma SQL ne bouge pas.
+
+## Complément (2026-09-07) : d'où vient le catalogue
+
+Le catalogue n'est pas construit par l'outil, il est importé : en démonstration depuis un YAML versionné
+(`config/catalogue.yml`), en contexte professionnel depuis le référentiel interne (PIM, ERP) ou une base produit
+ouverte (Open Icecat pour le hardware). Les caractéristiques ne sont donc jamais aspirées des fiches concurrentes,
+plus fiables en interne. Deux évolutions envisagées, non construites : la découverte d'annonces par recherche
+GTIN sur les sites (l'outil propose, un humain valide, comme pour le matching), et l'enrichissement assisté des
+caractéristiques à partir des tableaux conservés dans les archives distillées (ADR 0014), validé par un humain.

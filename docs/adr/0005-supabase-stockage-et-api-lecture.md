@@ -32,3 +32,18 @@ et les simulations avec paramètres personnalisés ; elle sera déployée quand 
   écriture réservée au batch via une clé de service stockée en secret GitHub.
 - Un snapshot JSON statique du dernier état, régénéré par le workflow, servira de filet de sécurité si l'API
   est indisponible devant un visiteur.
+
+## Complément (2026-09-07) : l'API de lecture est en place
+
+- Un schéma `api` de vues (`summary`, `price_matrix`, `price_history`, `recommendations`, `collection_failures`,
+  `products`, `sources`, `families`, `collection_runs`) est le contrat de lecture du portfolio (migration V5).
+  Les tables restent privées : sécurité par ligne activée partout sans politique, droits des rôles `anon` et
+  `authenticated` retirés du schéma `public` et limités à la lecture du schéma `api`. Les vues s'exécutent avec les
+  droits de leur propriétaire, le rôle du batch.
+- Côté Supabase : le schéma `api` est ajouté aux schémas exposés du Data API, et l'exposition automatique des
+  nouvelles tables est désactivée. Le front appelle `/rest/v1/<vue>` avec l'en-tête `Accept-Profile: api` et la clé
+  publique (« publishable »), conçue pour être embarquée dans un navigateur.
+- Le simulateur du front choisit parmi des profils précalculés chaque nuit (index 95, 98, 100, 103, alignement,
+  undercut 1 %, marge cible 25 %) ; le premier est la référence des vues de synthèse. Un module `app-web` n'est
+  pas nécessaire tant que ce choix suffit.
+- Vérifié depuis l'extérieur : lecture des vues OK, lecture d'une table refusée (401), écriture refusée.

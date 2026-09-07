@@ -179,10 +179,12 @@ marché strict : 3 offre(s) de 3 enseigne(s), min 949.99 EUR, médiane 969.95 EU
 · arrondi ,99 vers le bas : 954.50 EUR → 953.99 EUR
 ```
 
-Le profil se règle sous `pricing.*` dans [`application.yml`](app-batch/src/main/resources/application.yml) :
-stratégie (`index`, `align`, `undercut`, `leader`, `cost-plus`, `hold`) et ses paramètres, sources minimum,
-plancher de marge, plafond, variation maximale par jour, arrondi, et les règles du marché (fraîcheur, stock,
-reconditionné, quarantaine, marketplace).
+Les profils se règlent sous `pricing.*` dans [`application.yml`](app-batch/src/main/resources/application.yml) :
+une liste de stratégies précalculées (`index:98`, `align`, `undercut:1`, `cost-plus:25`, `leader:ldlc:-2`, `hold`),
+la première étant la référence, plus les garde-fous communs (sources minimum, plancher de marge, plafond, variation
+maximale par jour, arrondi) et les règles du marché (fraîcheur, stock, reconditionné, quarantaine, marketplace).
+Les vues du schéma `api` (matrice, historique, synthèse, recommandations) sont le contrat de lecture du portfolio,
+servies par l'API REST de Supabase ; les tables restent privées (sécurité par ligne, migration V5).
 
 ## Politesse et cadre d'usage
 

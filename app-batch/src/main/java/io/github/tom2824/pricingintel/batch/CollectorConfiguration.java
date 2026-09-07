@@ -149,12 +149,6 @@ class CollectorConfiguration {
         return sink != null ? sink : CollectionReportSink.none();
     }
 
-    /** Le profil de prix par défaut, utilisé par le calcul des recommandations et enregistré avec chacune. */
-    @Bean
-    io.github.tom2824.pricingintel.pricing.PricingProfile pricingProfile(PricingProperties pricing) {
-        return pricing.toProfile();
-    }
-
     @Bean
     CollectionRun collectionRun(List<PriceSource> sources, PriceSink sink, ListingProvider listingProvider, Clock clock) {
         return new CollectionRun(sources, sink, listingProvider, clock);

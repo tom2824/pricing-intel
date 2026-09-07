@@ -1,6 +1,5 @@
 package io.github.tom2824.pricingintel.persistence;
 
-import io.github.tom2824.pricingintel.pricing.PricingProfile;
 import java.time.Clock;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Bean;
@@ -41,11 +40,9 @@ public class PersistenceConfiguration {
         return new MarketOfferQuery(jdbc);
     }
 
-    /** Le profil vient de l'application ; sans bean de profil, le profil par défaut de l'ADR 0022. */
     @Bean
-    public PostgresRecommendationSink postgresRecommendationSink(JdbcClient jdbc,
-                                                                 org.springframework.beans.factory.ObjectProvider<PricingProfile> profile) {
-        return new PostgresRecommendationSink(jdbc, profile.getIfAvailable(PricingProfile::defaults));
+    public PostgresRecommendationSink postgresRecommendationSink(JdbcClient jdbc) {
+        return new PostgresRecommendationSink(jdbc);
     }
 
     @Bean

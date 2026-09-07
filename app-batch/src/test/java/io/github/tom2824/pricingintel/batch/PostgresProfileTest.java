@@ -16,7 +16,8 @@ import org.springframework.test.context.ActiveProfiles;
  */
 @SpringBootTest(properties = {
         "collector.catalogue.import-file=../persistence/src/test/resources/catalogue-test.yml",
-        "collector.sinks.types=console,postgres"
+        "collector.sinks.types=console,postgres",
+        "pricing.profiles=index:98,align"
 })
 @ActiveProfiles({"test", "postgres"})
 @AutoConfigureEmbeddedDatabase(provider = AutoConfigureEmbeddedDatabase.DatabaseProvider.ZONKY)
@@ -33,9 +34,12 @@ class PostgresProfileTest {
 
     @Test
     void computesAndStoresARecommendationPerProductAndScope() {
-        assertThat(pricingRunner.lastRecommendations()).hasSize(8);
-        assertThat(jdbc.sql("select count(*) from recommendation").query(Long.class).single()).isEqualTo(8L);
-        assertThat(jdbc.sql("select count(*) from recommendation_latest").query(Long.class).single()).isEqualTo(8L);
+        assertThat(pricingRunner.lastRecommendations()).hasSize(16);
+        assertThat(jdbc.sql("select count(*) from recommendation").query(Long.class).single()).isEqualTo(16L);
+        assertThat(jdbc.sql("select count(*) from recommendation where is_default").query(Long.class).single()).isEqualTo(8L);
+        assertThat(jdbc.sql("select count(*) from recommendation_latest").query(Long.class).single()).isEqualTo(16L);
+        assertThat(jdbc.sql("select count(*) from api.summary").query(Long.class).single()).isEqualTo(4L);
+        assertThat(jdbc.sql("select count(*) from api.recommendations where profile_key = 'align'").query(Long.class).single()).isEqualTo(8L);
         assertThat(jdbc.sql("select strategy from recommendation where price is not null limit 1").query(String.class).optional())
                 .contains("hold");
         assertThat(jdbc.sql("select explanation->>'text' from recommendation limit 1").query(String.class).single())

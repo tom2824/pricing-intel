@@ -14,7 +14,17 @@ public final class PricingEngine {
 
     private static final PricingStrategy HOLD = new PricingStrategy.Hold();
 
+    /** Calcule avec un profil anonyme (« default »), considéré comme le profil de référence. */
     public Recommendation recommend(MarketView market, ProductContext product, PricingProfile profile) {
+        return recommend(market, product, profile, "default", true);
+    }
+
+    /**
+     * @param profileKey     nom sous lequel la recommandation est stockée (plusieurs profils par produit)
+     * @param defaultProfile vrai pour le profil de référence des vues de synthèse
+     */
+    public Recommendation recommend(MarketView market, ProductContext product, PricingProfile profile,
+                                    String profileKey, boolean defaultProfile) {
         Explanation explanation = new Explanation();
         explanation.note("marché", "marché " + scopeLabel(market.scope()) + " : " + market.summary());
 
@@ -36,7 +46,7 @@ public final class PricingEngine {
         }
         if (candidate.isEmpty()) {
             explanation.note("résultat", "aucun prix proposable");
-            return new Recommendation(product.id(), market.asOf(), market, strategy.id(), fellBack, null, explanation);
+            return new Recommendation(product.id(), market.asOf(), market, profile, profileKey, defaultProfile, strategy.id(), fellBack, null, explanation);
         }
 
         Money price = candidate.get();
@@ -45,7 +55,7 @@ public final class PricingEngine {
         price = applyMaxDailyMove(price, product, profile, explanation);
         price = applyRounding(price, profile, explanation);
 
-        return new Recommendation(product.id(), market.asOf(), market, strategy.id(), fellBack, price, explanation);
+        return new Recommendation(product.id(), market.asOf(), market, profile, profileKey, defaultProfile, strategy.id(), fellBack, price, explanation);
     }
 
     private static Money applyMarginFloor(Money price, ProductContext product, PricingProfile profile, Explanation explanation) {

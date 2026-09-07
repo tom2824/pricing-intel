@@ -28,31 +28,31 @@ public class PostgresRecommendationSink implements RecommendationSink {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private final JdbcClient jdbc;
-    private final PricingProfile profile;
 
-    public PostgresRecommendationSink(JdbcClient jdbc, PricingProfile profile) {
-        this.jdbc = jdbc;
-        this.profile = Objects.requireNonNull(profile, "profile");
+    public PostgresRecommendationSink(JdbcClient jdbc) {
+        this.jdbc = Objects.requireNonNull(jdbc, "jdbc");
     }
 
     @Override
     @Transactional
     public void accept(List<Recommendation> recommendations) {
-        String profileJson = json(profileAsMap(profile));
         for (Recommendation r : recommendations) {
+            String profileJson = json(profileAsMap(r.profile()));
             jdbc.sql("""
-                            insert into recommendation (product_id, computed_at, scope, strategy, fell_back, profile, price,
+                            insert into recommendation (product_id, computed_at, scope, profile_key, is_default, strategy, fell_back, profile, price,
                                                         currency, index_vs_median, market, explanation)
-                            values (:product_id, :computed_at, :scope, :strategy, :fell_back, cast(:profile as jsonb), :price,
+                            values (:product_id, :computed_at, :scope, :profile_key, :is_default, :strategy, :fell_back, cast(:profile as jsonb), :price,
                                     :currency, :index_vs_median, cast(:market as jsonb), cast(:explanation as jsonb))
-                            on conflict (product_id, scope, computed_at) do update set
-                                strategy = excluded.strategy, fell_back = excluded.fell_back, profile = excluded.profile,
+                            on conflict (product_id, scope, profile_key, computed_at) do update set
+                                is_default = excluded.is_default, strategy = excluded.strategy, fell_back = excluded.fell_back, profile = excluded.profile,
                                 price = excluded.price, currency = excluded.currency, index_vs_median = excluded.index_vs_median,
                                 market = excluded.market, explanation = excluded.explanation
                             """)
                     .param("product_id", Long.parseLong(r.product().value()))
                     .param("computed_at", r.computedAt().atOffset(ZoneOffset.UTC))
                     .param("scope", r.market().scope() == MarketScope.STRICT ? "strict" : "segment")
+                    .param("profile_key", r.profileKey())
+                    .param("is_default", r.defaultProfile())
                     .param("strategy", r.strategyId())
                     .param("fell_back", r.fellBack())
                     .param("profile", profileJson)

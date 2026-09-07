@@ -4,8 +4,7 @@ Veille tarifaire multi-sources et moteur de recommandation de prix, appliqués a
 Un produit, N sources, un historique fiable, puis un prix proposé selon la stratégie choisie, avec son explication.
 
 État : **collecte par scraping** et **persistance PostgreSQL** (catalogue, correspondances, relevés quotidiens avec
-quarantaine, échecs de collecte) livrées, collecte quotidienne réelle sur quatre enseignes (LDLC, TopAchat, Materiel.net, Cybertek). Viennent ensuite l'analyse de marché,
-le moteur de stratégies et l'API de lecture.
+quarantaine, échecs de collecte) et **moteur de stratégies** (marché expliqué, six stratégies, garde-fous, recommandations stockées chaque jour) livrés, collecte quotidienne réelle sur quatre enseignes (LDLC, TopAchat, Materiel.net, Cybertek). Viennent ensuite l'API de lecture et l'onglet du portfolio.
 
 Les choix d'architecture sont documentés dans [docs/adr](docs/adr/README.md), la démarche dans
 [docs/philosophie.md](docs/philosophie.md).
@@ -31,6 +30,7 @@ flowchart LR
         pg[persistence<br/>PostgreSQL · Flyway · catalogue · relevés]
     end
     http[collector-http<br/>proxy · rate limit · retry · robots.txt]
+    pricing[pricing-engine<br/>marché · stratégies · explication]
     batch[app-batch<br/>Spring Boot, mode batch]
 
     scraper -- PriceSource --> collector
@@ -40,6 +40,8 @@ flowchart LR
     collector -- PriceSink --> pg
     pg -- ListingProvider --> collector
     collector --> domain
+    pg -- offres observées --> pricing
+    pricing -- recommandations --> pg
     batch -- assemble --> scraper & http & file & pg & collector
 ```
 
@@ -50,6 +52,7 @@ flowchart LR
 | `collector-http`     | Client HTTP poli : `ProxyPolicy` (aucun / fixe / rotation), rate limit par hôte, retry avec backoff, robots.txt | `collector-core` |
 | `source-scraper`     | Sites déclarés en YAML, chaîne d'extraction, parsing de prix FR/EN                     | `collector-core`, Jsoup, Jackson |
 | `sink-file`          | Relevés en JSON Lines, archives de pages distillées (JSON + Markdown) ou HTML complet, rétention | `collector-core`, Jackson, Jsoup |
+| `pricing-engine`     | Vue marché (règles de l'ADR 0020, chaque exclusion expliquée), six stratégies, garde-fous ordonnés, explication étape par étape (ADR 0022) | `domain` |
 | `persistence`        | Adaptateur PostgreSQL : schéma Flyway, catalogue en JPA (familles, produits, identifiants, annonces, correspondances), relevés avec quarantaine et échecs en SQL natif, import de catalogue YAML | `collector-core`, Spring Data JPA, Flyway |
 | `app-batch`          | Point d'entrée Spring Boot sans serveur web : configuration, assemblage, code de sortie | tout             |
 | `architecture-tests` | Règles ArchUnit sur les frontières entre modules                                       | tout (test)      |
@@ -159,6 +162,28 @@ caractéristiques à rôles (identité, équivalence, descriptive), clé naturel
 (plusieurs GTIN par produit), correspondances annonce ↔ produit datées avec preuve, relevé quotidien.
 Les tests de persistance tournent sur un PostgreSQL embarqué, sans Docker.
 
+## Recommandations de prix
+
+Après chaque collecte sous le profil `postgres`, le moteur construit pour chaque produit deux marchés
+(strict : le produit chez chaque enseigne ; segment : les produits équivalents) en appliquant les règles de
+l'ADR 0020, applique le profil par défaut et stocke une recommandation avec son explication complète.
+Exemple réel du 7 septembre 2026 :
+
+```text
+MSI GeForce RTX 5070 12G GAMING TRIO OC · proposé 953.99 EUR (index 98.35)
+marché strict : 3 offre(s) de 3 enseigne(s), min 949.99 EUR, médiane 969.95 EUR, max 969.95 EUR, 1 écartée(s)
+· index 98 % de la médiane : 969.95 EUR → 950.55 EUR
+· plancher marge 15 % (954.50 EUR) appliqué : 950.55 EUR → 954.50 EUR
+· plafond 110 % de la médiane (1066.95 EUR) respecté → 954.50 EUR
+· variation -2.6 % dans la limite de ±5 % → 954.50 EUR
+· arrondi ,99 vers le bas : 954.50 EUR → 953.99 EUR
+```
+
+Le profil se règle sous `pricing.*` dans [`application.yml`](app-batch/src/main/resources/application.yml) :
+stratégie (`index`, `align`, `undercut`, `leader`, `cost-plus`, `hold`) et ses paramètres, sources minimum,
+plancher de marge, plafond, variation maximale par jour, arrondi, et les règles du marché (fraîcheur, stock,
+reconditionné, quarantaine, marketplace).
+
 ## Politesse et cadre d'usage
 
 Un relevé par annonce et par jour, une requête toutes les trois secondes par hôte, User-Agent qui identifie
@@ -169,11 +194,10 @@ pas de proxy par défaut, pas d'appel aux API internes des sites. Détails et ra
 
 1. ~~Base Supabase branchée, cron GitHub Actions actif, premier vrai relevé~~ fait
 2. ~~Quatrième source et quatrième segment (ADR 0019)~~ fait
-3. Analyse de marché : min, médiane, index, exclusion des hors-stock et des aberrants
-4. Moteur de stratégies avec explication (alignement, undercut, index cible, marge cible, suivi d'un leader ;
-   règles transverses : plancher, plafond, arrondi ,99, variation max par jour)
-5. Matching semi-automatique (GTIN, marque + référence, similarité de titre) et relation d'équivalence par catégorie
-6. API de lecture et onglet portfolio
+3. ~~Analyse de marché et moteur de stratégies avec explication~~ fait (ADR 0020, 0022)
+4. API de lecture et onglet portfolio (matrice produit × enseigne, synthèse avec prix conseillé et explication)
+5. Détection des cassures d'extraction (ADR 0021) : taux de réussite par source, contrôle d'identité, rejeu sur archives
+6. Matching semi-automatique (GTIN, marque + référence, similarité de titre)
 
 ## Licence
 

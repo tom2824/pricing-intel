@@ -25,3 +25,5 @@ et l'ancien passe au statut « Remplacé par ». L'historique du raisonnement es
 | 0017 | [Un relevé par jour, échecs stockés, quarantaine, vue marché pour le moteur](0017-vue-marche-quarantaine-releve-quotidien.md) | Accepté (à implémenter) |
 | 0018 | [Persistance : adaptateur Spring Data JPA + Flyway, SQL natif pour les relevés](0018-persistance-spring-data-jpa-flyway.md) | Accepté (amende 0003) |
 | 0019 | [Abandon des jeux vidéo : le périmètre est le composant PC](0019-abandon-des-jeux-focus-hardware.md) | Accepté (remplace la partie jeux de 0006) |
+| 0020 | [Règles du marché : ce qu'une stratégie a le droit de regarder](0020-regles-du-marche.md) | Accepté |
+| 0021 | [Extraction robuste aux refontes et détection rapide des cassures](0021-robustesse-extraction-detection-des-cassures.md) | Proposé |

@@ -1,7 +1,7 @@
 # 0021. Extraction robuste aux refontes et détection rapide des cassures
 
 **Date** : 2026-09-07
-**Statut** : Proposé
+**Statut** : Accepté
 
 ## Contexte
 

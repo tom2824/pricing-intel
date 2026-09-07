@@ -43,7 +43,7 @@ import org.springframework.context.annotation.Primary;
  * une erreur de configuration signalée au démarrage.
  */
 @Configuration
-@EnableConfigurationProperties(CollectorProperties.class)
+@EnableConfigurationProperties({CollectorProperties.class, PricingProperties.class})
 class CollectorConfiguration {
 
     private static final Logger LOG = LoggerFactory.getLogger(CollectorConfiguration.class);
@@ -147,6 +147,12 @@ class CollectorConfiguration {
     CollectionReportSink collectionReportSink(ObjectProvider<PostgresCollectionReportSink> postgres) {
         PostgresCollectionReportSink sink = postgres.getIfAvailable();
         return sink != null ? sink : CollectionReportSink.none();
+    }
+
+    /** Le profil de prix par défaut, utilisé par le calcul des recommandations et enregistré avec chacune. */
+    @Bean
+    io.github.tom2824.pricingintel.pricing.PricingProfile pricingProfile(PricingProperties pricing) {
+        return pricing.toProfile();
     }
 
     @Bean

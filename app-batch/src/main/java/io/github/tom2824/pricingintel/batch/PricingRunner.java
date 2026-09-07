@@ -1,0 +1,95 @@
+package io.github.tom2824.pricingintel.batch;
+
+import io.github.tom2824.pricingintel.persistence.MarketOfferQuery;
+import io.github.tom2824.pricingintel.persistence.PostgresRecommendationSink;
+import io.github.tom2824.pricingintel.pricing.MarketBuilder;
+import io.github.tom2824.pricingintel.pricing.MarketScope;
+import io.github.tom2824.pricingintel.pricing.MarketView;
+import io.github.tom2824.pricingintel.pricing.ObservedOffer;
+import io.github.tom2824.pricingintel.pricing.PricingEngine;
+import io.github.tom2824.pricingintel.pricing.PricingProfile;
+import io.github.tom2824.pricingintel.pricing.Recommendation;
+import java.time.Clock;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
+
+/**
+ * Après la collecte : pour chaque produit actif, construit le marché strict et le marché de segment sur la
+ * fenêtre de fraîcheur, calcule la recommandation du profil par défaut, l'affiche et la stocke (ADR 0005, 0022).
+ * Ne fait rien sans base (profil postgres absent) ou si {@code pricing.enabled=false}.
+ */
+@Component
+@Order(2)
+class PricingRunner implements ApplicationRunner {
+
+    private static final Logger LOG = LoggerFactory.getLogger(PricingRunner.class);
+
+    private final PricingProperties properties;
+    private final ObjectProvider<MarketOfferQuery> offers;
+    private final ObjectProvider<PostgresRecommendationSink> sink;
+    private final Clock clock;
+    private List<Recommendation> lastRecommendations = List.of();
+
+    PricingRunner(PricingProperties properties, ObjectProvider<MarketOfferQuery> offers,
+                  ObjectProvider<PostgresRecommendationSink> sink, Clock clock) {
+        this.properties = properties;
+        this.offers = offers;
+        this.sink = sink;
+        this.clock = clock;
+    }
+
+    @Override
+    public void run(ApplicationArguments args) {
+        MarketOfferQuery query = offers.getIfAvailable();
+        if (!properties.enabled() || query == null) {
+            return;
+        }
+        PricingProfile profile = properties.toProfile();
+        MarketBuilder builder = new MarketBuilder(properties.toMarketRules());
+        PricingEngine engine = new PricingEngine();
+        Instant now = clock.instant();
+        Instant since = now.minus(properties.freshness());
+        List<Recommendation> recommendations = new ArrayList<>();
+
+        LOG.info("Recommandations : profil « {} », {} source(s) min, plancher marge {} %, plafond {} % médiane, ±{} %/jour, arrondi ,{}",
+                profile.strategy().describe(), profile.minSources(), profile.marginFloorPercent(),
+                profile.ceilingPercentOfMedian(), profile.maxDailyMovePercent(), profile.roundingCents());
+        for (MarketOfferQuery.ActiveProduct product : query.activeProducts()) {
+            for (MarketScope scope : MarketScope.values()) {
+                List<ObservedOffer> observed = query.latestOffers(product.id(), scope, since);
+                MarketView market = builder.build(product.context().id(), scope, now, product.currency(), observed);
+                Recommendation r = engine.recommend(market, product.context(), profile);
+                recommendations.add(r);
+                if (scope == MarketScope.STRICT) {
+                    LOG.info("  {} · {} · {}", product.context().name(), summary(r), r.explanation().render());
+                }
+            }
+        }
+        lastRecommendations = List.copyOf(recommendations);
+
+        PostgresRecommendationSink target = sink.getIfAvailable();
+        if (target != null) {
+            target.accept(recommendations);
+            LOG.info("{} recommandation(s) stockée(s)", recommendations.size());
+        }
+    }
+
+    private static String summary(Recommendation r) {
+        Optional<java.math.BigDecimal> index = r.indexVersusMedian();
+        return r.priceIfAny().map(p -> "proposé " + p + index.map(i -> " (index " + i + ")").orElse("")
+                + (r.fellBack() ? " [repli]" : "")).orElse("aucun prix proposable");
+    }
+
+    List<Recommendation> lastRecommendations() {
+        return lastRecommendations;
+    }
+}

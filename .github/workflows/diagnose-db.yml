@@ -16,26 +16,20 @@ jobs:
     steps:
       - name: Inspect secrets shape (values never printed)
         run: |
-          echo "url=$PRICING_INTEL_DB_URL"
-          echo "user=$PRICING_INTEL_DB_USER"
           echo "password bytes: $(printf '%s' "$PGPASSWORD" | wc -c)"
           echo "password whitespace chars: $(printf '%s' "$PGPASSWORD" | tr -cd '[:space:]' | wc -c)"
-          echo "password ends with CR or LF: $(printf '%s' "$PGPASSWORD" | tail -c1 | od -An -c | grep -cE '\r|\n')"
-          echo "password starts/ends with space: $(printf '%s' "$PGPASSWORD" | grep -cE '^ | $')"
       - name: Try psql through the session pooler
         run: |
           host=$(echo "$PRICING_INTEL_DB_URL" | sed -E 's#jdbc:postgresql://([^:/]+).*#\1#')
           echo "host=$host"
           psql "host=$host port=5432 dbname=postgres user=$PRICING_INTEL_DB_USER sslmode=require" -c "select current_user, version();" || echo "PSQL FAILED"
-      - name: Data summary (counts, last collection, latest snapshots)
+      - name: Data summary (counts, last collection, latest snapshots, recommendations)
         run: |
           host=$(echo "$PRICING_INTEL_DB_URL" | sed -E 's#jdbc:postgresql://([^:/]+).*#\1#')
           conn="host=$host port=5432 dbname=postgres user=$PRICING_INTEL_DB_USER sslmode=require"
-          psql "$conn" -c "select (select count(*) from product) products, (select count(*) from listing) listings, (select count(*) from listing_match where status='validated' and valid_to is null) matches, (select count(*) from price_snapshot) snapshots, (select count(*) from collection_run) runs, (select count(*) from collection_failure) failures;" || true
+          psql "$conn" -c "select (select count(*) from product) products, (select count(*) from listing) listings, (select count(*) from listing_match where status='validated' and valid_to is null) matches, (select count(*) from price_snapshot) snapshots, (select count(*) from collection_run) runs, (select count(*) from collection_failure) failures, (select count(*) from recommendation) recommendations;" || true
           psql "$conn" -c "select id, started_at, attempted, collected, failed from collection_run order by id desc limit 3;" || true
           psql "$conn" -c "select l.code, s.observed_date, s.price, s.availability, s.extraction_method, s.quarantine from price_snapshot s join listing l on l.id = s.listing_id order by s.observed_at desc limit 30;" || true
           psql "$conn" -c "select listing_code, reason from collection_failure order by id desc limit 15;" || true
-      - name: Try psql with a trimmed password (in case of a stray newline)
-        run: |
-          host=$(echo "$PRICING_INTEL_DB_URL" | sed -E 's#jdbc:postgresql://([^:/]+).*#\1#')
-          PGPASSWORD="$(printf '%s' "$PGPASSWORD" | tr -d '\r\n' | sed -E 's/^ +| +$//g')" psql "host=$host port=5432 dbname=postgres user=$PRICING_INTEL_DB_USER sslmode=require" -c "select 'trimmed password works' as result;" || echo "TRIMMED PSQL FAILED"
+          psql "$conn" -c "select p.name, r.scope, r.strategy, r.fell_back, r.price, r.index_vs_median, r.market->>'sourceCount' as sources, r.market->>'min' as min, r.market->>'median' as median from recommendation_latest r join product p on p.id = r.product_id order by p.family_code, p.name, r.scope;" || true
+          psql "$conn" -c "select p.name, r.explanation->>'text' as explanation from recommendation_latest r join product p on p.id = r.product_id where r.scope = 'strict' order by p.name limit 6;" || true

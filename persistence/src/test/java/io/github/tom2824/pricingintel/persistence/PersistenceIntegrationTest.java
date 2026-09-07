@@ -53,6 +53,12 @@ class PersistenceIntegrationTest {
     PostgresCollectionReportSink reportSink;
 
     @Autowired
+    MarketOfferQuery marketOffers;
+
+    @Autowired
+    PostgresRecommendationSink recommendationSink;
+
+    @Autowired
     JdbcClient jdbc;
 
     @Test
@@ -154,6 +160,40 @@ class PersistenceIntegrationTest {
         assertThatThrownBy(() -> priceSink.accept(snapshot("ghost", DAY1, "1.00")))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("ghost");
+    }
+
+    @Test
+    @Order(9)
+    void readsLatestOffersPerScopeAndStoresRecommendations() {
+        long msi = jdbc.sql("select id from product where brand = 'MSI'").query(Long.class).single();
+        Instant since = DAY1.minus(Duration.ofDays(1));
+
+        List<io.github.tom2824.pricingintel.pricing.ObservedOffer> strict = marketOffers.latestOffers(msi, io.github.tom2824.pricingintel.pricing.MarketScope.STRICT, since);
+        assertThat(strict).extracting(o -> o.listing().value()).containsExactlyInAnyOrder("ldlc-rtx4070s-msi", "topachat-rtx4070s-msi");
+        assertThat(strict).extracting(o -> o.price().amount().toPlainString()).containsExactlyInAnyOrder("205.00", "639.00");
+        assertThat(strict).allMatch(o -> !o.quarantined());
+
+        List<io.github.tom2824.pricingintel.pricing.ObservedOffer> segment = marketOffers.latestOffers(msi, io.github.tom2824.pricingintel.pricing.MarketScope.SEGMENT, since);
+        assertThat(segment).hasSize(3);
+        assertThat(segment).filteredOn(o -> o.listing().value().equals("ldlc-rtx4070s-gigabyte"))
+                .singleElement().satisfies(o -> assertThat(o.quarantined()).isTrue());
+
+        List<MarketOfferQuery.ActiveProduct> products = marketOffers.activeProducts();
+        assertThat(products).hasSize(4);
+        MarketOfferQuery.ActiveProduct msiProduct = products.stream().filter(p -> p.id() == msi).findFirst().orElseThrow();
+        assertThat(msiProduct.context().purchasePriceIfAny()).contains(Money.eur("520"));
+
+        var market = io.github.tom2824.pricingintel.pricing.MarketBuilder.withDefaults()
+                .build(msiProduct.context().id(), io.github.tom2824.pricingintel.pricing.MarketScope.STRICT, DAY1.plus(Duration.ofDays(3)), msiProduct.currency(), strict);
+        var recommendation = new io.github.tom2824.pricingintel.pricing.PricingEngine()
+                .recommend(market, msiProduct.context(), io.github.tom2824.pricingintel.pricing.PricingProfile.defaults());
+        recommendationSink.accept(List.of(recommendation));
+        recommendationSink.accept(List.of(recommendation));
+
+        assertThat(jdbc.sql("select count(*) from recommendation").query(Long.class).single()).isEqualTo(1L);
+        assertThat(jdbc.sql("select market->>'sourceCount' from recommendation").query(String.class).single()).isEqualTo("2");
+        assertThat(jdbc.sql("select jsonb_array_length(explanation->'steps') from recommendation").query(Integer.class).single()).isGreaterThan(3);
+        assertThat(jdbc.sql("select profile->>'strategy' from recommendation").query(String.class).single()).isEqualTo("index");
     }
 
     @Test

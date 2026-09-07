@@ -62,3 +62,25 @@ collector:
   catalogue:
     # import-file: config/catalogue.yml   # profil postgres : importe produits, identifiants et annonces avant la collecte
     collect-after-import: true
+
+# Profil de prix par défaut (ADR 0022) et règles du marché (ADR 0020). Calculé après chaque collecte sous le
+# profil postgres, une recommandation par produit et par périmètre (strict, segment), stockée avec son explication.
+pricing:
+  enabled: true
+  strategy: index              # index | align | undercut | leader | cost-plus | hold
+  index-percent: 98
+  index-reference: median      # median | mean | min
+  undercut-percent: 1
+  # leader-source: ldlc
+  leader-offset-percent: 0
+  margin-percent: 25           # pour cost-plus
+  min-sources: 2
+  margin-floor-percent: 15
+  ceiling-percent-of-median: 110
+  max-daily-move-percent: 5
+  rounding-cents: 99
+  freshness: 48h
+  in-stock-only: true
+  include-refurbished: false
+  exclude-quarantined: true
+  exclude-marketplace: true

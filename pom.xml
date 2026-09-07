@@ -18,6 +18,7 @@
     <module>collector-http</module>
     <module>source-scraper</module>
     <module>sink-file</module>
+    <module>pricing-engine</module>
     <module>persistence</module>
     <module>app-batch</module>
     <module>architecture-tests</module>
@@ -85,6 +86,11 @@
       <dependency>
         <groupId>io.github.tom2824</groupId>
         <artifactId>sink-file</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.tom2824</groupId>
+        <artifactId>pricing-engine</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>

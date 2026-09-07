@@ -15,6 +15,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.ExitCodeGenerator;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 /**
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Component;
  * Un cron ou GitHub Actions voit ainsi immédiatement une collecte cassée.
  */
 @Component
+@Order(1)
 class CollectRunner implements ApplicationRunner, ExitCodeGenerator {
 
     private static final Logger LOG = LoggerFactory.getLogger(CollectRunner.class);

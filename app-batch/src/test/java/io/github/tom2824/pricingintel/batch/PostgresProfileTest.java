@@ -26,7 +26,21 @@ class PostgresProfileTest {
     CollectRunner runner;
 
     @Autowired
+    PricingRunner pricingRunner;
+
+    @Autowired
     JdbcClient jdbc;
+
+    @Test
+    void computesAndStoresARecommendationPerProductAndScope() {
+        assertThat(pricingRunner.lastRecommendations()).hasSize(8);
+        assertThat(jdbc.sql("select count(*) from recommendation").query(Long.class).single()).isEqualTo(8L);
+        assertThat(jdbc.sql("select count(*) from recommendation_latest").query(Long.class).single()).isEqualTo(8L);
+        assertThat(jdbc.sql("select strategy from recommendation where price is not null limit 1").query(String.class).optional())
+                .contains("hold");
+        assertThat(jdbc.sql("select explanation->>'text' from recommendation limit 1").query(String.class).single())
+                .contains("marché strict").contains("sources insuffisantes");
+    }
 
     @Test
     void importsThenCollectsFromDatabaseListingsAndStoresFailures() {

@@ -12,7 +12,7 @@ import com.tngtech.archunit.lang.ArchRule;
 /**
  * Les frontières entre modules, exprimées en règles exécutables. Si quelqu'un importe Spring dans le domaine
  * ou fait dépendre le scraper du client HTTP concret, le build échoue ici avec un message explicite.
- * Ces règles sont la version vérifiée des ADR 0001, 0003 et 0018.
+ * Ces règles sont la version vérifiée des ADR 0001, 0003, 0018 et 0022.
  */
 @AnalyzeClasses(packages = ModuleBoundariesTest.ROOT, importOptions = ImportOption.DoNotIncludeTests.class)
 class ModuleBoundariesTest {
@@ -20,6 +20,7 @@ class ModuleBoundariesTest {
     static final String ROOT = "io.github.tom2824.pricingintel";
     static final String DOMAIN = ROOT + ".domain..";
     static final String CORE = ROOT + ".collector..";
+    static final String PRICING = ROOT + ".pricing..";
     static final String HTTP = ROOT + ".http..";
     static final String SCRAPER = ROOT + ".scraper..";
     static final String SINK = ROOT + ".sink..";
@@ -36,20 +37,26 @@ class ModuleBoundariesTest {
             .that().resideInAPackage(CORE)
             .should().onlyDependOnClassesThat().resideInAnyPackage(CORE, DOMAIN, "java..");
 
+    /** ADR 0022 : le moteur de prix est du Java pur, publiable comme bibliothèque. */
+    @ArchTest
+    static final ArchRule pricing_engine_depends_only_on_the_domain_and_the_jdk = classes()
+            .that().resideInAPackage(PRICING)
+            .should().onlyDependOnClassesThat().resideInAnyPackage(PRICING, DOMAIN, "java..");
+
     @ArchTest
     static final ArchRule http_adapter_ignores_its_siblings_and_the_application = noClasses()
             .that().resideInAPackage(HTTP)
-            .should().dependOnClassesThat().resideInAnyPackage(SCRAPER, SINK, PERSISTENCE, BATCH);
+            .should().dependOnClassesThat().resideInAnyPackage(SCRAPER, SINK, PERSISTENCE, PRICING, BATCH);
 
     @ArchTest
     static final ArchRule scraper_uses_the_fetcher_port_never_the_http_module = noClasses()
             .that().resideInAPackage(SCRAPER)
-            .should().dependOnClassesThat().resideInAnyPackage(HTTP, SINK, PERSISTENCE, BATCH);
+            .should().dependOnClassesThat().resideInAnyPackage(HTTP, SINK, PERSISTENCE, PRICING, BATCH);
 
     @ArchTest
     static final ArchRule sinks_ignore_their_siblings_and_the_application = noClasses()
             .that().resideInAPackage(SINK)
-            .should().dependOnClassesThat().resideInAnyPackage(HTTP, SCRAPER, PERSISTENCE, BATCH);
+            .should().dependOnClassesThat().resideInAnyPackage(HTTP, SCRAPER, PERSISTENCE, PRICING, BATCH);
 
     @ArchTest
     static final ArchRule persistence_ignores_its_siblings_and_the_application = noClasses()

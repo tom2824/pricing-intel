@@ -192,13 +192,13 @@ products:
     purchasePrice: 560
     currentPrice: 679.99
 
-  # ---- CPU : segment AM5 8 cœurs, deux X3D et un 9700X ---------------------------------------------------
+  # ---- CPU : pas d'équivalence entre modèles (segment = produit), voir ADR 0019 ------------------------------
   - key: cpu-amd-ryzen-7-7800x3d
     family: cpu
     brand: AMD
     mpn: 100-100000910WOF
     name: AMD Ryzen 7 7800X3D
-    attributes: {socket: AM5, cores: 8, threads: 16, boost_ghz: 5.0, l3_mb: 96, tdp_w: 120, packaging: box}
+    attributes: {model: Ryzen 7 7800X3D, socket: AM5, cores: 8, threads: 16, boost_ghz: 5.0, l3_mb: 96, tdp_w: 120, packaging: box}
     identifiers:
       - {scheme: gtin, value: "0730143314930"}
     purchasePrice: 340
@@ -209,7 +209,7 @@ products:
     brand: AMD
     mpn: 100-100001084WOF
     name: AMD Ryzen 7 9800X3D
-    attributes: {socket: AM5, cores: 8, threads: 16, boost_ghz: 5.2, l3_mb: 96, tdp_w: 120, packaging: box}
+    attributes: {model: Ryzen 7 9800X3D, socket: AM5, cores: 8, threads: 16, boost_ghz: 5.2, l3_mb: 96, tdp_w: 120, packaging: box}
     identifiers:
       - {scheme: gtin, value: "0730143315289"}
     purchasePrice: 400
@@ -220,7 +220,7 @@ products:
     brand: AMD
     mpn: 100-100001404WOF
     name: AMD Ryzen 7 9700X
-    attributes: {socket: AM5, cores: 8, threads: 16, boost_ghz: 5.5, l3_mb: 32, tdp_w: 65, packaging: box}
+    attributes: {model: Ryzen 7 9700X, socket: AM5, cores: 8, threads: 16, boost_ghz: 5.5, l3_mb: 32, tdp_w: 65, packaging: box}
     identifiers:
       - {scheme: gtin, value: "0730143315593"}
     purchasePrice: 280

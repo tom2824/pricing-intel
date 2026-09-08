@@ -37,9 +37,12 @@ pour rien, et une famille sans produit est inoffensive.
 
 ## Complément (2026-09-08) : cinquième segment et retrait des produits invendus
 
-- Un segment **processeurs** (famille `cpu`, migration V7) rejoint les quatre autres : Ryzen 7 7800X3D, 9800X3D et
-  9700X, équivalents par socket et nombre de cœurs, suivis chez les quatre enseignes. Ce sont les produits les plus
-  demandés du moment : un marché vivant vaut mieux qu'un marché théorique.
+- Un segment **processeurs** (famille `cpu`, migrations V7 et V8) rejoint les quatre autres : Ryzen 7 7800X3D,
+  9800X3D et 9700X, suivis chez les quatre enseignes. Ce sont les produits les plus demandés du moment : un marché
+  vivant vaut mieux qu'un marché théorique.
+- Contrairement aux cartes graphiques, où l'acheteur arbitre entre marques pour un même chipset, un processeur n'a
+  pas d'équivalent : personne ne voit un 9700X comme « la même chose » qu'un 9800X3D. L'équivalence de la famille est
+  donc le modèle lui-même : pour un processeur, le marché « segment » se confond avec le marché strict.
 - Les produits qu'aucune enseigne ne vend plus (ASUS PRIME RTX 5070, deux kits DDR5 en rupture depuis le début du
   suivi) ne donnaient aucun marché et un prix conseillé en repli permanent. Le catalogue les passe en
   `status: retired` et désactive leurs annonces : ils sortent des vues et du moteur, leur historique reste en base.

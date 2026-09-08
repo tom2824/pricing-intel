@@ -35,7 +35,7 @@ jobs:
           psql "$conn" -c "select p.name, r.explanation->>'text' as explanation from recommendation_latest r join product p on p.id = r.product_id where r.scope = 'strict' order by p.name limit 6;" || true
       - name: Storage (table sizes, database size, growth per day)
         run: |
-          host=$(echo "$PRICING_INTEL_DB_URL" | sed -E 's#jdbc:postgresql://([^:/]+).*##')
+          host=$(echo "$PRICING_INTEL_DB_URL" | sed -E 's#jdbc:postgresql://([^:/]+).*#\1#')
           conn="host=$host port=5432 dbname=postgres user=$PRICING_INTEL_DB_USER sslmode=require"
           psql "$conn" -c "select pg_size_pretty(pg_database_size(current_database())) as database_size;" || true
           psql "$conn" -c "select relname as table, n_live_tup as rows, pg_size_pretty(pg_total_relation_size(relid)) as total, pg_size_pretty(pg_relation_size(relid)) as data, pg_size_pretty(pg_indexes_size(relid)) as indexes, pg_size_pretty(coalesce(pg_total_relation_size(reltoastrelid), 0)) as toast from pg_stat_user_tables t join pg_class c on c.oid = t.relid where schemaname = 'public' order by pg_total_relation_size(relid) desc;" || true

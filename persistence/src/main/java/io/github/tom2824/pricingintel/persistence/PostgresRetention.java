@@ -24,8 +24,8 @@ public class PostgresRetention {
     public record Policy(Duration defaultProfileRecommendations, Duration otherProfilesRecommendations, Duration failures) {
     }
 
-    public record Result(int sameDayDuplicates, int otherProfiles, int defaultProfile, int failures) {
-        public int total() {
+    public record Result(int sameDayDuplicates, int otherProfiles, int defaultProfile, int compacted, int failures) {
+        public int deleted() {
             return sameDayDuplicates + otherProfiles + defaultProfile + failures;
         }
     }
@@ -59,10 +59,28 @@ public class PostgresRetention {
                         """)
                 .param("before", now.minus(policy.defaultProfileRecommendations()).atOffset(ZoneOffset.UTC))
                 .update();
-        // 4. Échecs de collecte : utiles pour expliquer un trou récent, pas au-delà.
+        // 4. Profil de référence, au-delà de la fenêtre courte : on garde les chiffres et la phrase d'explication
+        //    (l'historique du prix conseillé), on lâche le marché détaillé et les étapes, qui ne servent qu'au jour le jour.
+        int compacted = jdbc.sql("""
+                        update recommendation r
+                        set market = jsonb_build_object('scope', r.market -> 'scope', 'asOf', r.market -> 'asOf',
+                                                        'sourceCount', r.market -> 'sourceCount', 'min', r.market -> 'min',
+                                                        'median', r.market -> 'median', 'mean', r.market -> 'mean', 'max', r.market -> 'max',
+                                                        'compacted', true),
+                            explanation = jsonb_build_object('text', r.explanation -> 'text'),
+                            profile = jsonb_build_object('strategy', r.profile -> 'strategy', 'description', r.profile -> 'description')
+                        where r.is_default and r.computed_at < :before
+                          and not coalesce((r.market ->> 'compacted')::boolean, false)
+                          and exists (select 1 from recommendation newer
+                                      where newer.product_id = r.product_id and newer.scope = r.scope
+                                        and newer.profile_key = r.profile_key and newer.computed_at > r.computed_at)
+                        """)
+                .param("before", now.minus(policy.otherProfilesRecommendations()).atOffset(ZoneOffset.UTC))
+                .update();
+        // 5. Échecs de collecte : utiles pour expliquer un trou récent, pas au-delà.
         int failures = jdbc.sql("delete from collection_failure where occurred_at < :before")
                 .param("before", now.minus(policy.failures()).atOffset(ZoneOffset.UTC))
                 .update();
-        return new Result(duplicates, others, defaults, failures);
+        return new Result(duplicates, others, defaults, compacted, failures);
     }
 }

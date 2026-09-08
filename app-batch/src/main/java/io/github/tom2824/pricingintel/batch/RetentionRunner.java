@@ -39,9 +39,10 @@ class RetentionRunner implements ApplicationRunner {
         try {
             PostgresRetention.Result result = target.purge(properties.toPolicy(), clock.instant());
             LOG.info("Rétention : {} ligne(s) supprimée(s) ({} doublon(s) du jour, {} recommandation(s) de profils secondaires > {} j, "
-                            + "{} du profil de référence > {} j, {} échec(s) de collecte > {} j)",
-                    result.total(), result.sameDayDuplicates(), result.otherProfiles(), properties.otherProfilesRecommendations().toDays(),
-                    result.defaultProfile(), properties.defaultProfileRecommendations().toDays(), result.failures(), properties.failures().toDays());
+                            + "{} du profil de référence > {} j, {} échec(s) de collecte > {} j) ; {} recommandation(s) de référence compactée(s)",
+                    result.deleted(), result.sameDayDuplicates(), result.otherProfiles(), properties.otherProfilesRecommendations().toDays(),
+                    result.defaultProfile(), properties.defaultProfileRecommendations().toDays(), result.failures(), properties.failures().toDays(),
+                    result.compacted());
         } catch (RuntimeException e) {
             LOG.warn("Rétention non appliquée : {}", e.getMessage());
         }

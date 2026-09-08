@@ -35,14 +35,31 @@ Option 3, en fin de chaque collecte (module `persistence`, étape de batch aprè
 - **Jamais purgés** : relevés, décisions tarifaires, exécutions de collecte, catalogue. Ce sont les données
   d'historique, et elles sont petites.
 - **Recommandations** : une seule par jour, produit, périmètre et profil (la dernière exécution du jour gagne) ;
-  profils secondaires gardés 7 jours ; profil de référence gardé 365 jours ; la dernière recommandation de chaque
-  profil n'est jamais supprimée, la vue `recommendation_latest` et l'API restent pleines.
+  profils secondaires gardés 7 jours ; profil de référence gardé 365 jours, mais **compacté** au-delà de 7 jours :
+  on garde les chiffres du marché (sources, min, médiane, moyenne, max), le prix, l'index et la phrase
+  d'explication, on lâche les offres détaillées et les étapes, qui ne servent qu'à la lecture du jour. La
+  dernière recommandation de chaque profil n'est jamais touchée : la vue `recommendation_latest` et l'API restent
+  pleines.
 - **Échecs de collecte** : 180 jours.
 
-Croissance résultante : relevés 15 Ko, décisions 8 Ko, recommandations de référence 50 Ko, soit environ 75 Ko par
-jour, moins de 30 Mo par an. Le quota tient plus de dix ans, et une source ou un produit de plus n'ajoute que des
+Croissance résultante : relevés 15 Ko, décisions 8 Ko, recommandations de référence compactées 10 Ko, soit environ
+35 Ko par jour, moins de 15 Mo par an. Le quota tient plus de dix ans, et une source ou un produit de plus n'ajoute que des
 relevés, c'est-à-dire presque rien. Les fenêtres sont des propriétés (`retention.*`), les archives de pages restent
 régies par l'ADR 0014.
+
+## Ce qui reste en base, et pourquoi
+
+| Donnée | Rétention | Pourquoi |
+|---|---|---|
+| Catalogue (familles, produits, annonces, correspondances) | permanente | le référentiel |
+| Relevés, un par annonce et par jour | permanente | l'historique des prix, la matière première |
+| Décisions tarifaires | permanente | l'historique de notre prix et de la règle appliquée |
+| Exécutions de collecte | permanente, une ligne par exécution | la traçabilité |
+| Recommandation la plus récente de chaque profil | tant qu'une plus récente ne la remplace pas | ce que l'API et le portfolio affichent |
+| Recommandations du profil de référence | 365 jours, compactées après 7 | l'historique du prix conseillé |
+| Recommandations des autres profils | 7 jours | le simulateur ne regarde que le présent |
+| Échecs de collecte | 180 jours | expliquer un trou récent dans une courbe |
+| Archives de pages (fichiers, hors base) | ADR 0014 | rejouer un extracteur |
 
 ## Conséquences
 

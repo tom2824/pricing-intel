@@ -46,6 +46,7 @@ products:
     currentPrice: 949.99
 
   - key: rtx5070-asus-dual-oc
+    status: retired   # rupture ou sur commande chez toutes les enseignes (2026-09-09)
     family: gpu
     brand: ASUS
     mpn: DUAL-RTX5070-O12G
@@ -242,10 +243,10 @@ listings:
   - {code: materielnet-rtx5070-gigabyte-windforce, product: rtx5070-gigabyte-windforce-oc-sff, source: materiel-net, url: "https://www.materiel.net/produit/202503030098.html"}
   - {code: topachat-rtx5070-gigabyte-windforce,    product: rtx5070-gigabyte-windforce-oc-sff, source: topachat,     url: "https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_wgfx_pcie_puis_ref_est_in20027610.html"}
   - {code: cybertek-rtx5070-gigabyte-windforce,    product: rtx5070-gigabyte-windforce-oc-sff, source: cybertek,     url: "https://www.cybertek.fr/carte-graphique/gigabyte-geforce-rtx-5070-windforce-oc-sff-12g-151718.aspx"}
-  - {code: ldlc-rtx5070-asus-dual,                 product: rtx5070-asus-dual-oc,              source: ldlc,         url: "https://www.ldlc.com/fiche/PB00689546.html"}
-  - {code: materielnet-rtx5070-asus-dual,          product: rtx5070-asus-dual-oc,              source: materiel-net, url: "https://www.materiel.net/produit/202506100043.html"}
-  - {code: topachat-rtx5070-asus-dual,             product: rtx5070-asus-dual-oc,              source: topachat,     url: "https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_wgfx_pcie_puis_ref_est_in20028773.html"}
-  - {code: cybertek-rtx5070-asus-dual,             product: rtx5070-asus-dual-oc,              source: cybertek,     url: "https://www.cybertek.fr/carte-graphique/asus-dual-geforce-rtx-5070-12gb-gddr7-154213.aspx"}
+  - {code: ldlc-rtx5070-asus-dual,                 product: rtx5070-asus-dual-oc,              source: ldlc,         url: "https://www.ldlc.com/fiche/PB00689546.html", active: false}
+  - {code: materielnet-rtx5070-asus-dual,          product: rtx5070-asus-dual-oc,              source: materiel-net, url: "https://www.materiel.net/produit/202506100043.html", active: false}
+  - {code: topachat-rtx5070-asus-dual,             product: rtx5070-asus-dual-oc,              source: topachat,     url: "https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_wgfx_pcie_puis_ref_est_in20028773.html", active: false}
+  - {code: cybertek-rtx5070-asus-dual,             product: rtx5070-asus-dual-oc,              source: cybertek,     url: "https://www.cybertek.fr/carte-graphique/asus-dual-geforce-rtx-5070-12gb-gddr7-154213.aspx", active: false}
   - {code: ldlc-rtx5070-asus-prime,                product: rtx5070-asus-prime-oc,             source: ldlc,         url: "https://www.ldlc.com/fiche/PB00669231.html", active: false}
   - {code: materielnet-rtx5070-asus-prime,         product: rtx5070-asus-prime-oc,             source: materiel-net, url: "https://www.materiel.net/produit/202502210013.html", active: false}
   - {code: cybertek-rtx5070-asus-prime,            product: rtx5070-asus-prime-oc,             source: cybertek,     url: "https://www.cybertek.fr/carte-graphique/asus-prime-geforce-rtx-5070-12gb-gddr7-oc-edition-151450.aspx", active: false}

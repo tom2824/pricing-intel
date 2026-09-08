@@ -3,7 +3,9 @@
 # L'import est idempotent : un produit est reconnu par sa clé naturelle, une annonce par son code.
 # Ce fichier est public : il ne contient que des références produit et des URL de fiches.
 #
-# Quatre segments, relevés sur LDLC, TopAchat, Materiel.net et Cybertek (septembre 2026).
+# Cinq segments, relevés sur LDLC, TopAchat, Materiel.net et Cybertek (septembre 2026).
+# Un produit qu'aucune enseigne ne vend plus passe en « status: retired » et ses annonces en « active: false » :
+# il sort des vues et du moteur, son historique reste en base.
 # GTIN et références fabricant relevés dans le JSON-LD des fiches. Les prix d'achat sont fictifs.
 
 products:
@@ -53,6 +55,7 @@ products:
     currentPrice: 949.99
 
   - key: rtx5070-asus-prime-oc
+    status: retired   # rupture chez toutes les enseignes (2026-09-08)
     family: gpu
     brand: ASUS
     mpn: PRIME-RTX5070-O12G
@@ -99,6 +102,7 @@ products:
 
   # ---- RAM : segment DDR5 32 Go (2 x 16 Go) 6000 MT/s CL30 -----------------------------------------------
   - key: ram-kingston-fury-beast-32-6000-cl30
+    status: retired   # sur commande ou rupture partout ; remplacé par la version RGB (2026-09-08)
     family: ram
     brand: Kingston
     mpn: KF560C30BBEK2-32
@@ -110,6 +114,7 @@ products:
     currentPrice: 649.99
 
   - key: ram-corsair-vengeance-32-6000-cl30
+    status: retired   # rupture chez toutes les enseignes (2026-09-08)
     family: ram
     brand: Corsair
     mpn: CMK32GX5M2B6000Z30
@@ -165,6 +170,62 @@ products:
     purchasePrice: 140
     currentPrice: 179.99
 
+  - key: rtx5070-gigabyte-gaming-oc
+    family: gpu
+    brand: Gigabyte
+    mpn: GV-N5070GAMING OC-12GD
+    name: Gigabyte GeForce RTX 5070 GAMING OC 12G
+    attributes: {chipset: RTX 5070, vram_gb: 12, variant: Gaming OC, tdp_w: 250}
+    identifiers:
+      - {scheme: gtin, value: "4719331355722"}
+    purchasePrice: 830
+    currentPrice: 989.99
+
+  - key: ram-kingston-fury-beast-rgb-32-6000-cl30
+    family: ram
+    brand: Kingston
+    mpn: KF560C30BBEAK2-32
+    name: Kingston FURY Beast RGB 32 Go (2 x 16 Go) DDR5 6000 MHz CL30
+    attributes: {capacity_gb: 32, type: DDR5, speed_mts: 6000, cas_latency: 30, kit: 2x16, rgb: true}
+    identifiers:
+      - {scheme: gtin, value: "0740617342895"}
+    purchasePrice: 560
+    currentPrice: 679.99
+
+  # ---- CPU : segment AM5 8 cœurs, deux X3D et un 9700X ---------------------------------------------------
+  - key: cpu-amd-ryzen-7-7800x3d
+    family: cpu
+    brand: AMD
+    mpn: 100-100000910WOF
+    name: AMD Ryzen 7 7800X3D
+    attributes: {socket: AM5, cores: 8, threads: 16, boost_ghz: 5.0, l3_mb: 96, tdp_w: 120, packaging: box}
+    identifiers:
+      - {scheme: gtin, value: "0730143314930"}
+    purchasePrice: 340
+    currentPrice: 419.99
+
+  - key: cpu-amd-ryzen-7-9800x3d
+    family: cpu
+    brand: AMD
+    mpn: 100-100001084WOF
+    name: AMD Ryzen 7 9800X3D
+    attributes: {socket: AM5, cores: 8, threads: 16, boost_ghz: 5.2, l3_mb: 96, tdp_w: 120, packaging: box}
+    identifiers:
+      - {scheme: gtin, value: "0730143315289"}
+    purchasePrice: 400
+    currentPrice: 489.99
+
+  - key: cpu-amd-ryzen-7-9700x
+    family: cpu
+    brand: AMD
+    mpn: 100-100001404WOF
+    name: AMD Ryzen 7 9700X
+    attributes: {socket: AM5, cores: 8, threads: 16, boost_ghz: 5.5, l3_mb: 32, tdp_w: 65, packaging: box}
+    identifiers:
+      - {scheme: gtin, value: "0730143315593"}
+    purchasePrice: 280
+    currentPrice: 349.99
+
 listings:
   # ---- GPU
   - {code: ldlc-rtx5070-msi-ventus,                product: rtx5070-msi-ventus-2x-oc,          source: ldlc,         url: "https://www.ldlc.com/fiche/PB00668546.html"}
@@ -183,9 +244,9 @@ listings:
   - {code: materielnet-rtx5070-asus-dual,          product: rtx5070-asus-dual-oc,              source: materiel-net, url: "https://www.materiel.net/produit/202506100043.html"}
   - {code: topachat-rtx5070-asus-dual,             product: rtx5070-asus-dual-oc,              source: topachat,     url: "https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_wgfx_pcie_puis_ref_est_in20028773.html"}
   - {code: cybertek-rtx5070-asus-dual,             product: rtx5070-asus-dual-oc,              source: cybertek,     url: "https://www.cybertek.fr/carte-graphique/asus-dual-geforce-rtx-5070-12gb-gddr7-154213.aspx"}
-  - {code: ldlc-rtx5070-asus-prime,                product: rtx5070-asus-prime-oc,             source: ldlc,         url: "https://www.ldlc.com/fiche/PB00669231.html"}
-  - {code: materielnet-rtx5070-asus-prime,         product: rtx5070-asus-prime-oc,             source: materiel-net, url: "https://www.materiel.net/produit/202502210013.html"}
-  - {code: cybertek-rtx5070-asus-prime,            product: rtx5070-asus-prime-oc,             source: cybertek,     url: "https://www.cybertek.fr/carte-graphique/asus-prime-geforce-rtx-5070-12gb-gddr7-oc-edition-151450.aspx"}
+  - {code: ldlc-rtx5070-asus-prime,                product: rtx5070-asus-prime-oc,             source: ldlc,         url: "https://www.ldlc.com/fiche/PB00669231.html", active: false}
+  - {code: materielnet-rtx5070-asus-prime,         product: rtx5070-asus-prime-oc,             source: materiel-net, url: "https://www.materiel.net/produit/202502210013.html", active: false}
+  - {code: cybertek-rtx5070-asus-prime,            product: rtx5070-asus-prime-oc,             source: cybertek,     url: "https://www.cybertek.fr/carte-graphique/asus-prime-geforce-rtx-5070-12gb-gddr7-oc-edition-151450.aspx", active: false}
   # ---- SSD
   - {code: ldlc-ssd-990-pro-2to,                   product: ssd-samsung-990-pro-2to,           source: ldlc,         url: "https://www.ldlc.com/fiche/PB00512964.html"}
   - {code: materielnet-ssd-990-pro-2to,            product: ssd-samsung-990-pro-2to,           source: materiel-net, url: "https://www.materiel.net/produit/202208170009.html"}
@@ -198,12 +259,12 @@ listings:
   - {code: materielnet-ssd-mp600-pro-lpx-2to,      product: ssd-corsair-mp600-pro-lpx-2to,     source: materiel-net, url: "https://www.materiel.net/produit/202201100281.html"}
   - {code: topachat-ssd-mp600-pro-lpx-2to,         product: ssd-corsair-mp600-pro-lpx-2to,     source: topachat,     url: "https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_w_ssd_puis_ref_est_in20012315.html"}
   # ---- RAM
-  - {code: ldlc-ram-fury-beast-32-6000,            product: ram-kingston-fury-beast-32-6000-cl30, source: ldlc,         url: "https://www.ldlc.com/fiche/PB00654376.html"}
-  - {code: materielnet-ram-fury-beast-32-6000,     product: ram-kingston-fury-beast-32-6000-cl30, source: materiel-net, url: "https://www.materiel.net/produit/202411130035.html"}
-  - {code: topachat-ram-fury-beast-32-6000,        product: ram-kingston-fury-beast-32-6000-cl30, source: topachat,     url: "https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_wme_ddr5_puis_ref_est_in20025862.html"}
-  - {code: cybertek-ram-fury-beast-32-6000,        product: ram-kingston-fury-beast-32-6000-cl30, source: cybertek,     url: "https://www.cybertek.fr/memoire-pc/kingston-fury-beast-32go-2x16go-ddr5-6000mhz-cl30-143680.aspx"}
-  - {code: ldlc-ram-vengeance-32-6000-cl30,        product: ram-corsair-vengeance-32-6000-cl30, source: ldlc,         url: "https://www.ldlc.com/fiche/PB00563927.html"}
-  - {code: materielnet-ram-vengeance-32-6000-cl30, product: ram-corsair-vengeance-32-6000-cl30, source: materiel-net, url: "https://www.materiel.net/produit/202307170088.html"}
+  - {code: ldlc-ram-fury-beast-32-6000,            product: ram-kingston-fury-beast-32-6000-cl30, source: ldlc,         url: "https://www.ldlc.com/fiche/PB00654376.html", active: false}
+  - {code: materielnet-ram-fury-beast-32-6000,     product: ram-kingston-fury-beast-32-6000-cl30, source: materiel-net, url: "https://www.materiel.net/produit/202411130035.html", active: false}
+  - {code: topachat-ram-fury-beast-32-6000,        product: ram-kingston-fury-beast-32-6000-cl30, source: topachat,     url: "https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_wme_ddr5_puis_ref_est_in20025862.html", active: false}
+  - {code: cybertek-ram-fury-beast-32-6000,        product: ram-kingston-fury-beast-32-6000-cl30, source: cybertek,     url: "https://www.cybertek.fr/memoire-pc/kingston-fury-beast-32go-2x16go-ddr5-6000mhz-cl30-143680.aspx", active: false}
+  - {code: ldlc-ram-vengeance-32-6000-cl30,        product: ram-corsair-vengeance-32-6000-cl30, source: ldlc,         url: "https://www.ldlc.com/fiche/PB00563927.html", active: false}
+  - {code: materielnet-ram-vengeance-32-6000-cl30, product: ram-corsair-vengeance-32-6000-cl30, source: materiel-net, url: "https://www.materiel.net/produit/202307170088.html", active: false}
   - {code: ldlc-ram-flare-x5-32-6000-cl30,         product: ram-gskill-flare-x5-32-6000-cl30,  source: ldlc,         url: "https://www.ldlc.com/fiche/PB00548235.html"}
   - {code: materielnet-ram-flare-x5-32-6000-cl30,  product: ram-gskill-flare-x5-32-6000-cl30,  source: materiel-net, url: "https://www.materiel.net/produit/202303280143.html"}
   # ---- PSU
@@ -218,3 +279,23 @@ listings:
   - {code: ldlc-psu-focus-gx-850-v4,               product: psu-seasonic-focus-gx-850-v4,      source: ldlc,         url: "https://www.ldlc.com/fiche/PB00647652.html"}
   - {code: materielnet-psu-focus-gx-850-v4,        product: psu-seasonic-focus-gx-850-v4,      source: materiel-net, url: "https://www.materiel.net/produit/202409020020.html"}
   - {code: cybertek-psu-focus-gx-850-v4,           product: psu-seasonic-focus-gx-850-v4,      source: cybertek,     url: "https://www.cybertek.fr/alimentation/seasonic-atx-850w-80-gold-focus-gx-850-v4-147671.aspx"}
+  # ---- Ajouts du 2026-09-08
+  - {code: ldlc-rtx5070-gigabyte-gaming-oc,        product: rtx5070-gigabyte-gaming-oc,        source: ldlc,         url: "https://www.ldlc.com/fiche/PB00671174.html"}
+  - {code: materielnet-rtx5070-gigabyte-gaming-oc, product: rtx5070-gigabyte-gaming-oc,        source: materiel-net, url: "https://www.materiel.net/produit/202503030097.html"}
+  - {code: topachat-rtx5070-gigabyte-gaming-oc,    product: rtx5070-gigabyte-gaming-oc,        source: topachat,     url: "https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_wgfx_pcie_puis_ref_est_in20027609.html"}
+  - {code: cybertek-rtx5070-gigabyte-gaming-oc,    product: rtx5070-gigabyte-gaming-oc,        source: cybertek,     url: "https://www.cybertek.fr/carte-graphique/gigabyte-geforce-rtx-5070-gaming-oc-12g-151709.aspx"}
+  - {code: ldlc-ram-kingston-fury-rgb,             product: ram-kingston-fury-beast-rgb-32-6000-cl30, source: ldlc,         url: "https://www.ldlc.com/fiche/PB00630878.html"}
+  - {code: materielnet-ram-kingston-fury-rgb,      product: ram-kingston-fury-beast-rgb-32-6000-cl30, source: materiel-net, url: "https://www.materiel.net/produit/202408190004.html"}
+  - {code: cybertek-ram-kingston-fury-rgb,         product: ram-kingston-fury-beast-rgb-32-6000-cl30, source: cybertek,     url: "https://www.cybertek.fr/memoire-pc/kingston-fury-beast-rgb-32go-2x16go-ddr5-6000mhz-143705.aspx"}
+  - {code: ldlc-cpu-7800x3d,                       product: cpu-amd-ryzen-7-7800x3d,           source: ldlc,         url: "https://www.ldlc.com/fiche/PB00546345.html"}
+  - {code: materielnet-cpu-7800x3d,                product: cpu-amd-ryzen-7-7800x3d,           source: materiel-net, url: "https://www.materiel.net/produit/202302060094.html"}
+  - {code: topachat-cpu-7800x3d,                   product: cpu-amd-ryzen-7-7800x3d,           source: topachat,     url: "https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_wpr_puis_ref_est_in20016948.html"}
+  - {code: cybertek-cpu-7800x3d,                   product: cpu-amd-ryzen-7-7800x3d,           source: cybertek,     url: "https://www.cybertek.fr/processeur/amd-ryzen-7-7800x3d-5ghz-104mo-am5-box-131116.aspx"}
+  - {code: ldlc-cpu-9800x3d,                       product: cpu-amd-ryzen-7-9800x3d,           source: ldlc,         url: "https://www.ldlc.com/fiche/PB00650664.html"}
+  - {code: materielnet-cpu-9800x3d,                product: cpu-amd-ryzen-7-9800x3d,           source: materiel-net, url: "https://www.materiel.net/produit/202410210084.html"}
+  - {code: topachat-cpu-9800x3d,                   product: cpu-amd-ryzen-7-9800x3d,           source: topachat,     url: "https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_wpr_puis_ref_est_in20025379.html"}
+  - {code: cybertek-cpu-9800x3d,                   product: cpu-amd-ryzen-7-9800x3d,           source: cybertek,     url: "https://www.cybertek.fr/processeur/amd-ryzen-7-9800x3d-148505.aspx"}
+  - {code: ldlc-cpu-9700x,                         product: cpu-amd-ryzen-7-9700x,             source: ldlc,         url: "https://www.ldlc.com/fiche/PB00622381.html"}
+  - {code: materielnet-cpu-9700x,                  product: cpu-amd-ryzen-7-9700x,             source: materiel-net, url: "https://www.materiel.net/produit/202406100065.html"}
+  - {code: topachat-cpu-9700x,                     product: cpu-amd-ryzen-7-9700x,             source: topachat,     url: "https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_wpr_puis_ref_est_in20023807.html"}
+  - {code: cybertek-cpu-9700x,                     product: cpu-amd-ryzen-7-9700x,             source: cybertek,     url: "https://www.cybertek.fr/processeur/amd-ryzen-7-9700x-145514.aspx"}

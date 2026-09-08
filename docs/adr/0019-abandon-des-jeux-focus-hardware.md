@@ -34,3 +34,13 @@ pour rien, et une famille sans produit est inoffensive.
   source API si un jour une famille le justifie (pièces auto, par exemple).
 - Le temps gagné va à l'analyse de marché et au moteur de stratégies, avec des données réelles pour les tester.
 - Le portfolio présentera un outil de veille sur composants PC, pas un comparateur de prix de jeux.
+
+## Complément (2026-09-08) : cinquième segment et retrait des produits invendus
+
+- Un segment **processeurs** (famille `cpu`, migration V7) rejoint les quatre autres : Ryzen 7 7800X3D, 9800X3D et
+  9700X, équivalents par socket et nombre de cœurs, suivis chez les quatre enseignes. Ce sont les produits les plus
+  demandés du moment : un marché vivant vaut mieux qu'un marché théorique.
+- Les produits qu'aucune enseigne ne vend plus (ASUS PRIME RTX 5070, deux kits DDR5 en rupture depuis le début du
+  suivi) ne donnaient aucun marché et un prix conseillé en repli permanent. Le catalogue les passe en
+  `status: retired` et désactive leurs annonces : ils sortent des vues et du moteur, leur historique reste en base.
+  Rien n'est supprimé, conformément à l'ADR 0017.

@@ -64,7 +64,7 @@ class PersistenceIntegrationTest {
     @Test
     @Order(1)
     void migrationsSeedFamiliesAndSources() {
-        assertThat(jdbc.sql("select count(*) from product_family").query(Long.class).single()).isEqualTo(5L);
+        assertThat(jdbc.sql("select count(*) from product_family").query(Long.class).single()).isEqualTo(6L);
         assertThat(jdbc.sql("select count(*) from source").query(Long.class).single()).isEqualTo(5L);
     }
 
@@ -98,7 +98,7 @@ class PersistenceIntegrationTest {
     void refusesAnIdentifierThatBelongsToAnotherProduct() {
         CatalogueFile conflicting = new CatalogueFile(List.of(new CatalogueFile.ProductSpec("other", "gpu", "ASUS",
                 "DUAL-RTX4070S-O12G", "ASUS Dual RTX 4070 SUPER", Map.of("chipset", "RTX 4070 SUPER", "vram_gb", 12),
-                List.of(new CatalogueFile.IdentifierSpec("gtin", "4711377114363")), null, null, null)), List.of());
+                List.of(new CatalogueFile.IdentifierSpec("gtin", "4711377114363")), null, null, null, null)), List.of());
 
         assertThatThrownBy(() -> importer.importCatalogue(conflicting))
                 .isInstanceOf(IllegalStateException.class)

@@ -41,12 +41,21 @@ public record CatalogueFile(List<ProductSpec> products, List<ListingSpec> listin
             List<IdentifierSpec> identifiers,
             BigDecimal purchasePrice,
             BigDecimal currentPrice,
-            String currency) {
+            String currency,
+            String status) {
+
+        public static final String STATUS_ACTIVE = "active";
+        public static final String STATUS_RETIRED = "retired";
 
         public ProductSpec {
             attributes = attributes == null ? Map.of() : Map.copyOf(attributes);
             identifiers = identifiers == null ? List.of() : List.copyOf(identifiers);
             currency = currency == null || currency.isBlank() ? "EUR" : currency;
+            // Un produit retiré du suivi reste en base avec son historique ; il sort seulement des vues et du moteur.
+            status = status == null || status.isBlank() ? STATUS_ACTIVE : status.strip().toLowerCase(java.util.Locale.ROOT);
+            if (!status.equals(STATUS_ACTIVE) && !status.equals(STATUS_RETIRED)) {
+                throw new IllegalArgumentException("Product '" + key + "': status must be active or retired, got '" + status + "'");
+            }
         }
     }
 

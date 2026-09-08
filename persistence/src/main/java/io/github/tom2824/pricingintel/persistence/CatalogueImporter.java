@@ -153,6 +153,7 @@ public class CatalogueImporter {
             product = products.save(product);
             created = true;
         }
+        product.setStatus(spec.status());
 
         if (product.getMpn() != null) {
             attachIdentifier(product, ProductIdentifierEntity.SCHEME_MPN, Keys.normalize(product.getBrand()) + ":" + Keys.normalize(product.getMpn()));

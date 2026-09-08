@@ -162,6 +162,10 @@ public class ProductEntity {
         this.currency = currency;
     }
 
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     public void setPrices(BigDecimal purchasePrice, BigDecimal currentPrice) {
         this.purchasePrice = purchasePrice;
         this.currentPrice = currentPrice;

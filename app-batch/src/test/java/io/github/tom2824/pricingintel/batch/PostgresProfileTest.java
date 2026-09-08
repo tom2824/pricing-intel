@@ -47,6 +47,14 @@ class PostgresProfileTest {
     }
 
     @Test
+    void recordsOneDecisionPerProductAndKeepsPricesWhenNoRuleCanPropose() {
+        assertThat(jdbc.sql("select count(*) from product_price_decision").query(Long.class).single()).isEqualTo(4L);
+        assertThat(jdbc.sql("select count(*) from product_price_decision where changed").query(Long.class).single()).isZero();
+        assertThat(jdbc.sql("select count(*) from api.our_price_history").query(Long.class).single()).isEqualTo(4L);
+        assertThat(jdbc.sql("select count(*) from api.summary where decision_profile_key is not null").query(Long.class).single()).isEqualTo(4L);
+    }
+
+    @Test
     void importsThenCollectsFromDatabaseListingsAndStoresFailures() {
         assertThat(jdbc.sql("select count(*) from product").query(Long.class).single()).isEqualTo(4L);
         assertThat(jdbc.sql("select count(*) from listing").query(Long.class).single()).isEqualTo(4L);

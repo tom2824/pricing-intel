@@ -24,6 +24,8 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
 @ConfigurationProperties(prefix = "pricing")
 public record PricingProperties(
         @DefaultValue("true") boolean enabled,
+        /** ADR 0023 : chaque jour, une règle tirée au sort met à jour notre prix. */
+        @DefaultValue("true") boolean dailyDecision,
         @DefaultValue({"index:98", "index:95", "index:100", "index:103", "align", "undercut:1", "cost-plus:25"}) List<String> profiles,
         @DefaultValue("2") int minSources,
         @DefaultValue("15") BigDecimal marginFloorPercent,

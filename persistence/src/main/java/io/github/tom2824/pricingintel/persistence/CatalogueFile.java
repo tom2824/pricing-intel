@@ -16,7 +16,7 @@ import java.util.Map;
  *     attributes: {chipset: RTX 4070 SUPER, vram_gb: 12}
  *     identifiers: [{scheme: gtin, value: "4711377114363"}]
  *     purchasePrice: 520
- *     currentPrice: 599.99
+ *     currentPrice: 599.99                # prix initial seulement : ensuite décidé chaque jour en base (ADR 0023)
  * listings:
  *   - code: ldlc-rtx4070s-msi-ventus
  *     product: rtx4070s-msi-ventus       # optionnel : sans produit, l'annonce est relevée mais non appariée

@@ -152,13 +152,19 @@ public class ProductEntity {
         return identifiers;
     }
 
+    /**
+     * Mise à jour depuis le catalogue. Le prix courant n'en fait pas partie : il vit en base, décidé chaque jour
+     * (ADR 0023) ; la valeur du catalogue n'est qu'un prix initial, posé si le produit n'en a pas encore.
+     */
     public void update(String name, Map<String, Object> attributes, String equivalenceKey,
-                       BigDecimal purchasePrice, BigDecimal currentPrice, String currency) {
+                       BigDecimal purchasePrice, BigDecimal initialPrice, String currency) {
         this.name = name;
         this.attributes = attributes;
         this.equivalenceKey = equivalenceKey;
         this.purchasePrice = purchasePrice;
-        this.currentPrice = currentPrice;
+        if (this.currentPrice == null) {
+            this.currentPrice = initialPrice;
+        }
         this.currency = currency;
     }
 

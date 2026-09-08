@@ -7,6 +7,8 @@
 # Un produit qu'aucune enseigne ne vend plus passe en « status: retired » et ses annonces en « active: false » :
 # il sort des vues et du moteur, son historique reste en base.
 # GTIN et références fabricant relevés dans le JSON-LD des fiches. Les prix d'achat sont fictifs.
+# currentPrice est un prix initial : dès le premier passage, notre prix vit en base et change chaque jour
+# selon une règle tirée au sort (ADR 0023). Modifier cette valeur ne change pas un produit déjà créé.
 
 products:
   # ---- GPU : segment GeForce RTX 5070 12 Go GDDR7, cinq cartes, trois marques ----------------------------

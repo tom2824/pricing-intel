@@ -28,3 +28,4 @@ et l'ancien passe au statut « Remplacé par ». L'historique du raisonnement es
 | 0020 | [Règles du marché : ce qu'une stratégie a le droit de regarder](0020-regles-du-marche.md) | Accepté |
 | 0021 | [Extraction robuste aux refontes et détection rapide des cassures](0021-robustesse-extraction-detection-des-cassures.md) | Accepté |
 | 0022 | [Moteur de stratégies : un prix candidat, des garde-fous, une explication](0022-moteur-de-strategies.md) | Accepté |
+| 0023 | [Simulation des décisions tarifaires : une règle tirée au sort chaque jour](0023-simulation-des-decisions-tarifaires.md) | Accepté |

@@ -46,6 +46,11 @@ public class PersistenceConfiguration {
     }
 
     @Bean
+    public PostgresPriceDecisionStore postgresPriceDecisionStore(JdbcClient jdbc) {
+        return new PostgresPriceDecisionStore(jdbc);
+    }
+
+    @Bean
     public CatalogueImporter catalogueImporter(ProductFamilyRepository families,
                                                ProductRepository products,
                                                ProductIdentifierRepository identifiers,

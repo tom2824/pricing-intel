@@ -43,7 +43,7 @@ import org.springframework.context.annotation.Primary;
  * une erreur de configuration signalée au démarrage.
  */
 @Configuration
-@EnableConfigurationProperties({CollectorProperties.class, PricingProperties.class})
+@EnableConfigurationProperties({CollectorProperties.class, PricingProperties.class, RetentionProperties.class})
 class CollectorConfiguration {
 
     private static final Logger LOG = LoggerFactory.getLogger(CollectorConfiguration.class);

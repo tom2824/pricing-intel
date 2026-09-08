@@ -47,6 +47,13 @@ class PostgresProfileTest {
     }
 
     @Test
+    void retentionKeepsTheLatestRecommendationOfEveryProfile() {
+        // Une seule exécution : rien à élaguer, et surtout rien de perdu.
+        assertThat(jdbc.sql("select count(*) from recommendation").query(Long.class).single()).isEqualTo(16L);
+        assertThat(jdbc.sql("select count(*) from recommendation_latest").query(Long.class).single()).isEqualTo(16L);
+    }
+
+    @Test
     void recordsOneDecisionPerProductAndKeepsPricesWhenNoRuleCanPropose() {
         assertThat(jdbc.sql("select count(*) from product_price_decision").query(Long.class).single()).isEqualTo(4L);
         assertThat(jdbc.sql("select count(*) from product_price_decision where changed").query(Long.class).single()).isZero();

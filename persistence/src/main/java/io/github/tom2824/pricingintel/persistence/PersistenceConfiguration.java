@@ -51,6 +51,11 @@ public class PersistenceConfiguration {
     }
 
     @Bean
+    public PostgresRetention postgresRetention(JdbcClient jdbc) {
+        return new PostgresRetention(jdbc);
+    }
+
+    @Bean
     public CatalogueImporter catalogueImporter(ProductFamilyRepository families,
                                                ProductRepository products,
                                                ProductIdentifierRepository identifiers,

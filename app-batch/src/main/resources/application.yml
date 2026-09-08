@@ -83,3 +83,12 @@ pricing:
   include-refurbished: false
   exclude-quarantined: true
   exclude-marketplace: true
+
+# Rétention en base (ADR 0024) : relevés, décisions et exécutions jamais purgés. Les recommandations, lourdes de
+# leur JSON, sont élaguées : une par jour et par profil, profils secondaires 7 jours, profil de référence 365 jours,
+# la dernière de chaque profil toujours conservée. Échecs de collecte 180 jours.
+retention:
+  enabled: true
+  default-profile-recommendations: 365d
+  other-profiles-recommendations: 7d
+  failures: 180d

@@ -29,3 +29,4 @@ et l'ancien passe au statut « Remplacé par ». L'historique du raisonnement es
 | 0021 | [Extraction robuste aux refontes et détection rapide des cassures](0021-robustesse-extraction-detection-des-cassures.md) | Accepté |
 | 0022 | [Moteur de stratégies : un prix candidat, des garde-fous, une explication](0022-moteur-de-strategies.md) | Accepté |
 | 0023 | [Simulation des décisions tarifaires : une règle tirée au sort chaque jour](0023-simulation-des-decisions-tarifaires.md) | Accepté |
+| 0024 | [Rétention en base alignée sur le quota du fournisseur](0024-retention-en-base-alignee-sur-le-quota.md) | Accepté |

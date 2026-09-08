@@ -5,9 +5,12 @@ name: Collecte
 
 on:
   workflow_dispatch:
-  # Collecte quotidienne à 08:00 UTC (10:00 à Paris en été).
+  # Collecte quotidienne. GitHub retarde les crons planifiés à l'heure pile (jusqu'à plusieurs heures en période
+  # de charge) : on vise une minute creuse, 06:17 UTC (08:17 à Paris en été), avec une seconde chance à 12:17 UTC.
+  # Un relevé par annonce et par jour (ADR 0017) : la seconde exécution ne crée pas de doublon.
   schedule:
-    - cron: '0 8 * * *'
+    - cron: '17 6 * * *'
+    - cron: '17 12 * * *'
 
 jobs:
   collect:

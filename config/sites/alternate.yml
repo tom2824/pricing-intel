@@ -1,0 +1,11 @@
+# Alternate France (groupe Alternate, ajouté le 2026-09-09). Fiches avec JSON-LD Product : prix, disponibilité,
+# mpn et sku, mais pas de GTIN : l'appariement se fait par référence fabricant. Le repli CSS est un filet de
+# secours : à vérifier sur une vraie page avant de s'y fier.
+id: alternate
+host: "*.alternate.fr"
+extractors:
+  - type: jsonld
+  - type: css
+    price: "[itemprop=price], .price-container .price, .price"
+    availability: "[itemprop=availability], .delivery-info, .stock"
+    title: "h1"

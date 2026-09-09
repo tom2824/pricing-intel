@@ -3,7 +3,7 @@
 # L'import est idempotent : un produit est reconnu par sa clé naturelle, une annonce par son code.
 # Ce fichier est public : il ne contient que des références produit et des URL de fiches.
 #
-# Cinq segments, relevés sur LDLC, TopAchat, Materiel.net et Cybertek (septembre 2026).
+# Cinq segments, relevés sur LDLC, TopAchat, Materiel.net, Cybertek, 1fodiscount et Alternate (septembre 2026).
 # Un produit qu'aucune enseigne ne vend plus passe en « status: retired » et ses annonces en « active: false » :
 # il sort des vues et du moteur, son historique reste en base.
 # GTIN et références fabricant relevés dans le JSON-LD des fiches. Les prix d'achat sont fictifs.
@@ -302,3 +302,30 @@ listings:
   - {code: materielnet-cpu-9700x,                  product: cpu-amd-ryzen-7-9700x,             source: materiel-net, url: "https://www.materiel.net/produit/202406100065.html"}
   - {code: topachat-cpu-9700x,                     product: cpu-amd-ryzen-7-9700x,             source: topachat,     url: "https://www.topachat.com/pages/detail2_cat_est_micro_puis_rubrique_est_wpr_puis_ref_est_in20023807.html"}
   - {code: cybertek-cpu-9700x,                     product: cpu-amd-ryzen-7-9700x,             source: cybertek,     url: "https://www.cybertek.fr/processeur/amd-ryzen-7-9700x-145514.aspx"}
+  # ---- 1fodiscount et Alternate (ajoutés le 2026-09-09, fiches validées par GTIN ou référence fabricant)
+  - {code: 1fodiscount-cpu-7800x3d,                 product: cpu-amd-ryzen-7-7800x3d,           source: 1fodiscount,  url: "https://www.1fodiscount.com/p188799-processeur-amd-ryzen-7-7800x3d-5-ghz-am5/"}
+  - {code: 1fodiscount-cpu-9800x3d,                 product: cpu-amd-ryzen-7-9800x3d,           source: 1fodiscount,  url: "https://www.1fodiscount.com/p210519-processeur-amd-ryzen-7-9800x3d-52-ghz-am5/"}
+  - {code: 1fodiscount-cpu-9700x,                   product: cpu-amd-ryzen-7-9700x,             source: 1fodiscount,  url: "https://www.1fodiscount.com/p205647-processeur-amd-ryzen-7-9700x-55-ghz-am5/"}
+  - {code: 1fodiscount-rtx5070-msi-ventus,          product: rtx5070-msi-ventus-2x-oc,          source: 1fodiscount,  url: "https://www.1fodiscount.com/p213584-carte-graphique-msi-geforce-rtx-5070-ventus-2x-oc/"}
+  - {code: 1fodiscount-rtx5070-msi-gaming-trio,     product: rtx5070-msi-gaming-trio-oc,        source: 1fodiscount,  url: "https://www.1fodiscount.com/p213582-carte-graphique-msi-geforce-rtx-5070-gaming-trio-oc/"}
+  - {code: 1fodiscount-rtx5070-gigabyte-windforce,  product: rtx5070-gigabyte-windforce-oc-sff, source: 1fodiscount,  url: "https://www.1fodiscount.com/p213097-carte-graphique-gigabyte-geforce-rtx-5070-windforce-oc-sff/"}
+  - {code: 1fodiscount-rtx5070-gigabyte-gaming-oc,  product: rtx5070-gigabyte-gaming-oc,        source: 1fodiscount,  url: "https://www.1fodiscount.com/p213096-carte-graphique-gigabyte-geforce-rtx-5070-gaming-oc/"}
+  - {code: 1fodiscount-psu-mag-a850gl,              product: psu-msi-mag-a850gl-pcie5,          source: 1fodiscount,  url: "https://www.1fodiscount.com/p191666-alimentation-atx-msi-mag-a850gl-pcie5-850w-noir/"}
+  - {code: 1fodiscount-ram-flare-x5,                product: ram-gskill-flare-x5-32-6000-cl30,  source: 1fodiscount,  url: "https://www.1fodiscount.com/p192585-kit-barrettes-memoire-32go-2x16go-dimm-ddr5-gskill-flare-x5-6000mhz-cl30-amd-expo-noir/"}
+  - {code: 1fodiscount-ram-kingston-fury-rgb,       product: ram-kingston-fury-beast-rgb-32-6000-cl30, source: 1fodiscount, url: "https://www.1fodiscount.com/p219543-kit-barrettes-memoire-32go-2x16go-dimm-ddr5-kingston-fury-beast-rgb-6000mhz-noir/"}
+  - {code: 1fodiscount-ssd-990-pro-2to,             product: ssd-samsung-990-pro-2to,           source: 1fodiscount,  url: "https://www.1fodiscount.com/p189289-disque-ssd-samsung-990-pro-2to-nvme-m2-type-2280/"}
+  - {code: 1fodiscount-ssd-p310-2to,                product: ssd-crucial-p310-2to,              source: 1fodiscount,  url: "https://www.1fodiscount.com/p210356-disque-ssd-crucial-p310-2to-m2-nvme-type-2280/"}
+  - {code: 1fodiscount-ssd-mp600-pro-lpx-2to,       product: ssd-corsair-mp600-pro-lpx-2to,     source: 1fodiscount,  url: "https://www.1fodiscount.com/p176187-disque-ssd-corsair-mp600-pro-lpx-2to-nvme-m2-type-2280-noir/"}
+  - {code: alternate-cpu-7800x3d,                   product: cpu-amd-ryzen-7-7800x3d,           source: alternate,    url: "https://www.alternate.fr/AMD/Ryzen-7-7800X3D-4-2-GHz-(5-0-GHz-Turbo-Boost)-socket-AM5-processeur/html/product/1898270"}
+  - {code: alternate-cpu-9800x3d,                   product: cpu-amd-ryzen-7-9800x3d,           source: alternate,    url: "https://www.alternate.fr/AMD/Ryzen-7-9800X3D-socket-AM5-processeur/html/product/100093605"}
+  - {code: alternate-cpu-9700x,                     product: cpu-amd-ryzen-7-9700x,             source: alternate,    url: "https://www.alternate.fr/AMD/Ryzen-7-9700X-3-8-GHz-(5-5-GHz-Turbo-Boost)-socket-AM5-processeur/html/product/100065791"}
+  - {code: alternate-rtx5070-msi-ventus,            product: rtx5070-msi-ventus-2x-oc,          source: alternate,    url: "https://www.alternate.fr/MSI/GeForce-RTX-5070-12G-VENTUS-2X-OC-Carte-graphique/html/product/100116805"}
+  - {code: alternate-rtx5070-msi-gaming-trio,       product: rtx5070-msi-gaming-trio-oc,        source: alternate,    url: "https://www.alternate.fr/MSI/GeForce-RTX-5070-12G-GAMING-TRIO-OC-Carte-graphique/html/product/100116802"}
+  - {code: alternate-rtx5070-gigabyte-windforce,    product: rtx5070-gigabyte-windforce-oc-sff, source: alternate,    url: "https://www.alternate.fr/GIGABYTE/GeForce-RTX-5070-WINDFORCE-OC-SFF-12G-Carte-graphique/html/product/100119338"}
+  - {code: alternate-rtx5070-gigabyte-gaming-oc,    product: rtx5070-gigabyte-gaming-oc,        source: alternate,    url: "https://www.alternate.fr/GIGABYTE/GeForce-RTX-5070-GAMING-OC-12G-Carte-graphique/html/product/100119330"}
+  - {code: alternate-psu-rm850e,                    product: psu-corsair-rm850e-2025,           source: alternate,    url: "https://www.alternate.fr/Corsair/RM850e-(2024)-alimentation-modulaire-850-watt/html/product/100098365"}
+  - {code: alternate-psu-focus-gx-850-v4,           product: psu-seasonic-focus-gx-850-v4,      source: alternate,    url: "https://www.alternate.fr/Seasonic/FOCUS-GX-850-V4-ATX3-1-alimentation-modulaire-850-watt/html/product/100076199"}
+  - {code: alternate-ram-flare-x5,                  product: ram-gskill-flare-x5-32-6000-cl30,  source: alternate,    url: "https://www.alternate.fr/G-Skill/Flare-X5-32-Go-DDR5-6000-(2x-16-Go)-m%C3%A9moire-vive/html/product/1906541"}
+  - {code: alternate-ram-kingston-fury-rgb,         product: ram-kingston-fury-beast-rgb-32-6000-cl30, source: alternate, url: "https://www.alternate.fr/Kingston-FURY/Beast-RGB-32-Go-DDR5-6000-(2x-16-Go)-m%C3%A9moire-vive/html/product/100052224"}
+  - {code: alternate-ssd-990-pro-2to,               product: ssd-samsung-990-pro-2to,           source: alternate,    url: "https://www.alternate.fr/Samsung/990-PRO-2-To-SSD/html/product/1864243"}
+  - {code: alternate-ssd-mp600-pro-lpx-2to,         product: ssd-corsair-mp600-pro-lpx-2to,     source: alternate,    url: "https://www.alternate.fr/Corsair/MP600-PRO-LPX-2-To-SSD/html/product/1814802"}

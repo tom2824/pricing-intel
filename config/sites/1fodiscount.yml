@@ -1,0 +1,10 @@
+# 1fodiscount (indépendant, ajouté le 2026-09-09). Fiches avec JSON-LD Product : prix, disponibilité, gtin13 (sans
+# zéro de tête) et mpn. Le repli CSS est un filet de secours : à vérifier sur une vraie page avant de s'y fier.
+id: 1fodiscount
+host: "*.1fodiscount.com"
+extractors:
+  - type: jsonld
+  - type: css
+    price: "[itemprop=price], .product-price .price, .price"
+    availability: "[itemprop=availability], .product-stock, .stock"
+    title: "h1"

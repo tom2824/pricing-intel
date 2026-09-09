@@ -47,3 +47,13 @@ pour rien, et une famille sans produit est inoffensive.
   suivi) ne donnaient aucun marché et un prix conseillé en repli permanent. Le catalogue les passe en
   `status: retired` et désactive leurs annonces : ils sortent des vues et du moteur, leur historique reste en base.
   Rien n'est supprimé, conformément à l'ADR 0017.
+
+## Complément (2026-09-09) : six enseignes, quatre groupes
+
+Deux enseignes rejoignent le suivi, 1fodiscount (indépendant) et Alternate France (groupe Alternate), après un tour
+de douze candidats avec l'User-Agent du projet : seuls ceux qui laissent passer un client poli, n'interdisent pas
+leurs fiches dans robots.txt et exposent un prix lisible ont été retenus. Boulanger, Darty, BPM Power et Caseking
+bloquent les clients non navigateur ; Amazon, Rue du Commerce et PC21 interdisent tout ; Grosbill partage la
+plateforme de Cybertek. Trois de nos quatre premières enseignes étant du même groupe, ces deux ajouts pèsent plus
+que leur nombre : la médiane devient un marché à quatre groupes. PcComponentes, qui expose plusieurs offres par
+fiche avec leur vendeur, attend une évolution du scraper (offres multiples, type de vendeur).

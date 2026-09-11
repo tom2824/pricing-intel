@@ -203,12 +203,16 @@ class PersistenceIntegrationTest {
     @Order(8)
     void storesCollectionRunsAndFailures() {
         CollectionReport report = new CollectionReport(DAY1, DAY1.plus(Duration.ofMinutes(2)), 4, 3, 0, List.of(
-                new CollectionReport.Failure(new ListingId("newshop-orphan"), "scraper", "HTTP 503", true),
-                new CollectionReport.Failure(new ListingId("deleted-listing"), "none", "No source", false)));
+                new CollectionReport.Failure(new ListingId("newshop-orphan"), "scraper", "HTTP 503 for https://newshop.test/p/9", true),
+                new CollectionReport.Failure(new ListingId("deleted-listing"), "none", "No source supports https://gone.test/p/1", false),
+                new CollectionReport.Failure(new ListingId("ldlc-rtx4070s-msi"), "sink", "Sink error: java.lang.IllegalStateException: boom", true)));
 
         reportSink.accept(report);
 
-        assertThat(jdbc.sql("select failed from collection_run").query(Integer.class).single()).isEqualTo(2);
+        assertThat(jdbc.sql("select failed from collection_run").query(Integer.class).single()).isEqualTo(3);
+        // L'API publique classe les motifs : ni URL, ni message d'exception, ni nom de classe (V12).
+        assertThat(jdbc.sql("select reason from api.collection_failures order by listing_code").query(String.class).list())
+                .containsExactly("no-source", "storage", "http-503");
         assertThat(jdbc.sql("select listing_id from collection_failure where listing_code = 'newshop-orphan'").query(Long.class).single())
                 .isNotNull();
         assertThat(jdbc.sql("select listing_id from collection_failure where listing_code = 'deleted-listing'").query(Long.class).optional())

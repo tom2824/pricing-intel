@@ -12,6 +12,16 @@ on:
     - cron: '17 6 * * *'
     - cron: '17 12 * * *'
 
+# Le jeton du workflow ne sert qu'à lire le dépôt : la base est atteinte par ses propres secrets.
+permissions:
+  contents: read
+
+# Jamais deux collectes en parallèle sur la même base (un lancement manuel pendant le cron attend son tour) :
+# les upserts protègent les relevés, mais la rétention et la quarantaine ne sont pas conçues pour la concurrence.
+concurrency:
+  group: collecte
+  cancel-in-progress: false
+
 jobs:
   collect:
     runs-on: ubuntu-latest
@@ -45,7 +55,7 @@ jobs:
 
       - name: Publish collected snapshots
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v4
         with:
           name: releves-${{ github.run_id }}
           path: |

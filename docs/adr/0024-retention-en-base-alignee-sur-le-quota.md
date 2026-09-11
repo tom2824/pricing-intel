@@ -34,7 +34,10 @@ Option 3, en fin de chaque collecte (module `persistence`, étape de batch aprè
 
 - **Jamais purgés** : relevés, décisions tarifaires, exécutions de collecte, catalogue. Ce sont les données
   d'historique, et elles sont petites.
-- **Recommandations** : une seule par jour, produit, périmètre et profil (la dernière exécution du jour gagne) ;
+- **Recommandations** : une seule par jour, produit, périmètre et profil, garantie par la table elle-même depuis la
+  migration V11 : la première exécution du jour fait foi, c'est elle qui a servi à la décision tarifaire (ADR 0023),
+  une exécution suivante le même jour est ignorée (à l'origine la dernière gagnait, ce qui faisait afficher une
+  explication calculée après la décision) ;
   profils secondaires gardés 7 jours ; profil de référence gardé 365 jours, mais **compacté** au-delà de 7 jours :
   on garde les chiffres du marché (sources, min, médiane, moyenne, max), le prix, l'index et la phrase
   d'explication, on lâche les offres détaillées et les étapes, qui ne servent qu'à la lecture du jour. La

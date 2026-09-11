@@ -22,6 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Stocke les recommandations avec leur marché et leur explication en JSON : c'est ce que l'onglet du
  * portfolio lira directement, sans recalcul (ADR 0005). Le profil utilisé est enregistré avec chaque ligne.
+ * Une recommandation par jour, produit, périmètre et profil : la première exécution du jour fait foi, c'est
+ * elle qui a servi à la décision tarifaire (ADR 0023) ; une exécution suivante le même jour est ignorée.
  */
 public class PostgresRecommendationSink implements RecommendationSink {
 
@@ -39,17 +41,15 @@ public class PostgresRecommendationSink implements RecommendationSink {
         for (Recommendation r : recommendations) {
             String profileJson = json(profileAsMap(r.profile()));
             jdbc.sql("""
-                            insert into recommendation (product_id, computed_at, scope, profile_key, is_default, strategy, fell_back, profile, price,
-                                                        currency, index_vs_median, market, explanation)
-                            values (:product_id, :computed_at, :scope, :profile_key, :is_default, :strategy, :fell_back, cast(:profile as jsonb), :price,
-                                    :currency, :index_vs_median, cast(:market as jsonb), cast(:explanation as jsonb))
-                            on conflict (product_id, scope, profile_key, computed_at) do update set
-                                is_default = excluded.is_default, strategy = excluded.strategy, fell_back = excluded.fell_back, profile = excluded.profile,
-                                price = excluded.price, currency = excluded.currency, index_vs_median = excluded.index_vs_median,
-                                market = excluded.market, explanation = excluded.explanation
+                            insert into recommendation (product_id, computed_at, computed_date, scope, profile_key, is_default, strategy, fell_back,
+                                                        profile, price, currency, index_vs_median, market, explanation)
+                            values (:product_id, :computed_at, :computed_date, :scope, :profile_key, :is_default, :strategy, :fell_back,
+                                    cast(:profile as jsonb), :price, :currency, :index_vs_median, cast(:market as jsonb), cast(:explanation as jsonb))
+                            on conflict (product_id, scope, profile_key, computed_date) do nothing
                             """)
                     .param("product_id", Long.parseLong(r.product().value()))
                     .param("computed_at", r.computedAt().atOffset(ZoneOffset.UTC))
+                    .param("computed_date", r.computedAt().atOffset(ZoneOffset.UTC).toLocalDate())
                     .param("scope", r.market().scope() == MarketScope.STRICT ? "strict" : "segment")
                     .param("profile_key", r.profileKey())
                     .param("is_default", r.defaultProfile())

@@ -30,12 +30,14 @@ flowchart LR
         pg[persistence<br/>PostgreSQL · Flyway · catalogue · relevés]
     end
     http[collector-http<br/>proxy · rate limit · retry · robots.txt]
+    json[support-json<br/>bloc équilibré · parseur tolérant]
     pricing[pricing-engine<br/>marché · stratégies · explication]
     batch[app-batch<br/>Spring Boot, mode batch]
 
     scraper -- PriceSource --> collector
     api -. PriceSource .-> collector
     http -- PageFetcher --> scraper
+    scraper & file --> json
     collector -- PriceSink --> file
     collector -- PriceSink --> pg
     pg -- ListingProvider --> collector
@@ -49,6 +51,7 @@ flowchart LR
 |----------------------|----------------------------------------------------------------------------------------|------------------|
 | `domain`             | Modèle métier (records immuables)                                                      | JDK              |
 | `collector-core`     | Ports `PriceSource`, `PriceSink`, `PageFetcher`, `RawSnapshotStore`, `ListingProvider` ; orchestration | `domain` |
+| `support-json`       | Lecture de JSON trouvé dans des pages : bloc équilibré dans un script, parseur tolérant, accès aux champs. Technique, sans métier, partagé par le scraper et le sink fichier | Jackson |
 | `collector-http`     | Client HTTP poli : `ProxyPolicy` (aucun / fixe / rotation), rate limit par hôte, retry avec backoff, robots.txt | `collector-core` |
 | `source-scraper`     | Sites déclarés en YAML, chaîne d'extraction, parsing de prix FR/EN                     | `collector-core`, Jsoup, Jackson |
 | `sink-file`          | Relevés en JSON Lines, archives de pages distillées (JSON + Markdown) ou HTML complet, rétention | `collector-core`, Jackson, Jsoup |

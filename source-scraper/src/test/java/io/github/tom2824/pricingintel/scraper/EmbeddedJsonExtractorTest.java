@@ -64,12 +64,4 @@ class EmbeddedJsonExtractorTest {
         assertThatThrownBy(() -> new EmbeddedJsonExtractor("script", null, Map.of("price", "props.price"), "EUR"))
                 .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("pointer");
     }
-
-    @Test
-    void balancedJsonStopsAtTheMatchingBracket() {
-        assertThat(EmbeddedJsonExtractor.balancedJson("x = {\"a\":[1,{\"b\":\"}\"}]}; y = 2", 3))
-                .isEqualTo("{\"a\":[1,{\"b\":\"}\"}]}");
-        assertThat(EmbeddedJsonExtractor.balancedJson("x = 42;", 3)).isNull();
-        assertThat(EmbeddedJsonExtractor.balancedJson("x = {\"unterminated\": 1", 3)).isNull();
-    }
 }

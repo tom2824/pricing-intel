@@ -26,6 +26,7 @@ class ModuleBoundariesTest {
     static final String SINK = ROOT + ".sink..";
     static final String PERSISTENCE = ROOT + ".persistence..";
     static final String BATCH = ROOT + ".batch..";
+    static final String JSON = ROOT + ".json..";
 
     @ArchTest
     static final ArchRule domain_depends_only_on_the_jdk = classes()
@@ -42,6 +43,12 @@ class ModuleBoundariesTest {
     static final ArchRule pricing_engine_depends_only_on_the_domain_and_the_jdk = classes()
             .that().resideInAPackage(PRICING)
             .should().onlyDependOnClassesThat().resideInAnyPackage(PRICING, DOMAIN, "java..");
+
+    /** Le support JSON est un outil technique : Jackson et le JDK, rien du projet. */
+    @ArchTest
+    static final ArchRule json_support_depends_only_on_jackson_and_the_jdk = classes()
+            .that().resideInAPackage(JSON)
+            .should().onlyDependOnClassesThat().resideInAnyPackage(JSON, "com.fasterxml.jackson..", "java..");
 
     @ArchTest
     static final ArchRule http_adapter_ignores_its_siblings_and_the_application = noClasses()

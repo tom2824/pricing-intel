@@ -1,9 +1,9 @@
 package io.github.tom2824.pricingintel.sink.file;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import io.github.tom2824.pricingintel.json.JsonText;
+import io.github.tom2824.pricingintel.json.TolerantJson;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -25,11 +25,6 @@ import org.jsoup.nodes.TextNode;
  */
 public final class HtmlDistiller {
 
-    /** Lecture tolérante : des sites laissent des retours à la ligne bruts dans les chaînes de leur JSON-LD. */
-    private static final ObjectMapper MAPPER = com.fasterxml.jackson.databind.json.JsonMapper.builder()
-            .enable(com.fasterxml.jackson.core.json.JsonReadFeature.ALLOW_UNESCAPED_CONTROL_CHARS)
-            .enable(com.fasterxml.jackson.core.json.JsonReadFeature.ALLOW_TRAILING_COMMA)
-            .build();
     private static final int MAX_JSON_BLOCKS = 20;
 
     /** Éléments retirés avant rendu : jamais du contenu produit. */
@@ -76,7 +71,7 @@ public final class HtmlDistiller {
             String data = script.data();
             Matcher matcher = GLOBAL_ASSIGNMENT.matcher(data);
             while (matcher.find()) {
-                String json = balancedJson(data, matcher.end());
+                String json = JsonText.balanced(data, matcher.end());
                 JsonNode node = json == null ? null : parse(json);
                 if (node != null) {
                     addBlock(blocks, "window." + matcher.group(1), node);
@@ -98,52 +93,8 @@ public final class HtmlDistiller {
     }
 
     private static JsonNode parse(String text) {
-        if (text == null || text.isBlank()) {
-            return null;
-        }
-        try {
-            return MAPPER.readTree(text);
-        } catch (JsonProcessingException e) {
-            return null;
-        }
+        return TolerantJson.readOrNull(text);
     }
-
-    /** Extrait l'objet ou le tableau JSON équilibré qui commence à {@code from} (accolades dans les chaînes ignorées). */
-    static String balancedJson(String text, int from) {
-        int start = from;
-        while (start < text.length() && Character.isWhitespace(text.charAt(start))) {
-            start++;
-        }
-        if (start >= text.length() || (text.charAt(start) != '{' && text.charAt(start) != '[')) {
-            return null;
-        }
-        int depth = 0;
-        boolean inString = false;
-        for (int i = start; i < text.length(); i++) {
-            char c = text.charAt(i);
-            if (inString) {
-                if (c == '\\') {
-                    i++;
-                } else if (c == '"') {
-                    inString = false;
-                }
-                continue;
-            }
-            switch (c) {
-                case '"' -> inString = true;
-                case '{', '[' -> depth++;
-                case '}', ']' -> {
-                    if (--depth == 0) {
-                        return text.substring(start, i + 1);
-                    }
-                }
-                default -> {
-                }
-            }
-        }
-        return null;
-    }
-
     static String toMarkdown(Document document) {
         Element root = document.selectFirst("main, [role=main], article");
         if (root == null) {

@@ -73,11 +73,4 @@ class HtmlDistillerTest {
         assertThat(page.title()).isEmpty();
         assertThat(page.markdown()).isEmpty();
     }
-
-    @Test
-    void balancedJsonHandlesStringsAndNesting() {
-        assertThat(HtmlDistiller.balancedJson("= {\"a\":[1,{\"b\":\"}\"}]}; next", 1)).isEqualTo("{\"a\":[1,{\"b\":\"}\"}]}");
-        assertThat(HtmlDistiller.balancedJson("= 42", 1)).isNull();
-        assertThat(HtmlDistiller.balancedJson("= {\"open\": 1", 1)).isNull();
-    }
 }

@@ -2,10 +2,11 @@ package io.github.tom2824.pricingintel.scraper;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.tom2824.pricingintel.domain.Availability;
 import io.github.tom2824.pricingintel.domain.ItemCondition;
 import io.github.tom2824.pricingintel.domain.ObservedIdentity;
+import io.github.tom2824.pricingintel.json.JsonNodes;
+import io.github.tom2824.pricingintel.json.TolerantJson;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
@@ -25,11 +26,6 @@ public final class JsonLdExtractor implements Extractor {
     public static final double CONFIDENCE = 0.95;
 
     private static final Logger LOG = LoggerFactory.getLogger(JsonLdExtractor.class);
-    /** Lecture tolérante : des sites laissent des retours à la ligne bruts dans les chaînes (vu chez Cybertek). */
-    private static final ObjectMapper MAPPER = com.fasterxml.jackson.databind.json.JsonMapper.builder()
-            .enable(com.fasterxml.jackson.core.json.JsonReadFeature.ALLOW_UNESCAPED_CONTROL_CHARS)
-            .enable(com.fasterxml.jackson.core.json.JsonReadFeature.ALLOW_TRAILING_COMMA)
-            .build();
     private static final List<String> NESTING_KEYS = List.of("@graph", "mainEntity", "itemListElement", "item");
     private static final List<String> GTIN_KEYS = List.of("gtin13", "gtin", "gtin14", "gtin12", "gtin8");
 
@@ -49,7 +45,7 @@ public final class JsonLdExtractor implements Extractor {
         for (Element script : document.select("script[type=application/ld+json]")) {
             JsonNode root;
             try {
-                root = MAPPER.readTree(script.data());
+                root = TolerantJson.MAPPER.readTree(script.data());
             } catch (JsonProcessingException e) {
                 LOG.debug("Skipping unparseable JSON-LD block on {}: {}", document.location(), e.getOriginalMessage());
                 continue;
@@ -184,14 +180,6 @@ public final class JsonLdExtractor implements Extractor {
     }
 
     private static String text(JsonNode node, String key) {
-        if (node == null) {
-            return null;
-        }
-        JsonNode value = node.get(key);
-        if (value == null || value.isNull() || value.isContainerNode()) {
-            return null;
-        }
-        String text = value.asText();
-        return text.isBlank() ? null : text;
+        return JsonNodes.textOrNull(node, key);
     }
 }

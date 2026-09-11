@@ -2,9 +2,11 @@ package io.github.tom2824.pricingintel.scraper;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.tom2824.pricingintel.domain.Availability;
 import io.github.tom2824.pricingintel.domain.ObservedIdentity;
+import io.github.tom2824.pricingintel.json.JsonNodes;
+import io.github.tom2824.pricingintel.json.JsonText;
+import io.github.tom2824.pricingintel.json.TolerantJson;
 import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Optional;
@@ -24,7 +26,6 @@ public final class EmbeddedJsonExtractor implements Extractor {
     public static final double CONFIDENCE = 0.85;
 
     private static final Logger LOG = LoggerFactory.getLogger(EmbeddedJsonExtractor.class);
-    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private final String scriptSelector;
     private final String variable;
@@ -68,7 +69,7 @@ public final class EmbeddedJsonExtractor implements Extractor {
         }
         JsonNode root;
         try {
-            root = MAPPER.readTree(json);
+            root = TolerantJson.MAPPER.readTree(json);
         } catch (JsonProcessingException e) {
             LOG.debug("Embedded JSON on {} is not parseable: {}", document.location(), e.getOriginalMessage());
             return Optional.empty();
@@ -103,55 +104,13 @@ public final class EmbeddedJsonExtractor implements Extractor {
             if (equals < 0) {
                 continue;
             }
-            String json = balancedJson(data, equals + 1);
+            String json = JsonText.balanced(data, equals + 1);
             if (json != null) {
                 return json;
             }
         }
         return null;
     }
-
-    /** Extrait l'objet ou le tableau JSON qui commence au premier {@code {} ou {@code [} après {@code from}. */
-    static String balancedJson(String text, int from) {
-        int start = from;
-        while (start < text.length() && Character.isWhitespace(text.charAt(start))) {
-            start++;
-        }
-        if (start >= text.length()) {
-            return null;
-        }
-        char open = text.charAt(start);
-        if (open != '{' && open != '[') {
-            return null;
-        }
-        int depth = 0;
-        boolean inString = false;
-        for (int i = start; i < text.length(); i++) {
-            char c = text.charAt(i);
-            if (inString) {
-                if (c == '\\') {
-                    i++;
-                } else if (c == '"') {
-                    inString = false;
-                }
-                continue;
-            }
-            switch (c) {
-                case '"' -> inString = true;
-                case '{', '[' -> depth++;
-                case '}', ']' -> {
-                    depth--;
-                    if (depth == 0) {
-                        return text.substring(start, i + 1);
-                    }
-                }
-                default -> {
-                }
-            }
-        }
-        return null;
-    }
-
     private Availability availability(JsonNode root) {
         String pointer = paths.get("availability");
         if (pointer == null) {
@@ -176,11 +135,6 @@ public final class EmbeddedJsonExtractor implements Extractor {
         if (pointer == null) {
             return null;
         }
-        JsonNode node = root.at(pointer);
-        if (node.isMissingNode() || node.isNull() || node.isContainerNode()) {
-            return null;
-        }
-        String text = node.asText();
-        return text.isBlank() ? null : text;
+        return JsonNodes.textOrNull(root.at(pointer));
     }
 }

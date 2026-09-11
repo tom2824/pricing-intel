@@ -199,7 +199,7 @@ class PersistenceIntegrationTest {
     @Test
     @Order(8)
     void storesCollectionRunsAndFailures() {
-        CollectionReport report = new CollectionReport(DAY1, DAY1.plus(Duration.ofMinutes(2)), 4, 3, List.of(
+        CollectionReport report = new CollectionReport(DAY1, DAY1.plus(Duration.ofMinutes(2)), 4, 3, 0, List.of(
                 new CollectionReport.Failure(new ListingId("newshop-orphan"), "scraper", "HTTP 503", true),
                 new CollectionReport.Failure(new ListingId("deleted-listing"), "none", "No source", false)));
 

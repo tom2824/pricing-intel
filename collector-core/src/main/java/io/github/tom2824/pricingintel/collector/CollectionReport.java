@@ -5,8 +5,15 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 
-/** Bilan d'une collecte : combien d'annonces tentées, combien de relevés produits, et chaque échec expliqué. */
-public record CollectionReport(Instant startedAt, Instant finishedAt, int attempted, int collected, List<Failure> failures) {
+/**
+ * Bilan d'une collecte : combien d'annonces tentées, combien ont leur relevé du jour, et chaque échec expliqué.
+ *
+ * @param attempted annonces à relever
+ * @param collected annonces qui ont un relevé aujourd'hui, {@code skipped} comprises
+ * @param skipped   annonces déjà relevées avant cette exécution, donc pas refetchées
+ */
+public record CollectionReport(Instant startedAt, Instant finishedAt, int attempted, int collected, int skipped,
+                               List<Failure> failures) {
 
     public CollectionReport {
         failures = List.copyOf(failures);
@@ -26,12 +33,14 @@ public record CollectionReport(Instant startedAt, Instant finishedAt, int attemp
     }
 
     public String summary() {
-        return "%d/%d relevés collectés, %d échec(s), %d ms".formatted(
-                collected, attempted, failures.size(), duration().toMillis());
+        return "%d/%d relevés collectés%s, %d échec(s), %d ms".formatted(
+                collected, attempted, skipped > 0 ? " (dont " + skipped + " déjà relevés aujourd'hui)" : "",
+                failures.size(), duration().toMillis());
     }
 
     /**
-     * @param sourceId  source qui a échoué, ou {@code none} si aucune source ne prend l'annonce en charge
+     * @param sourceId  source qui a échoué, {@code none} si aucune source ne prend l'annonce en charge,
+     *                  {@link CollectionRun#SINK} si le relevé a été obtenu mais pas conservé
      * @param retryable vrai si retenter plus tard a un sens
      */
     public record Failure(ListingId listingId, String sourceId, String reason, boolean retryable) {

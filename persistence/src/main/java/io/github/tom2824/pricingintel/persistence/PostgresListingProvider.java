@@ -6,8 +6,10 @@ import io.github.tom2824.pricingintel.domain.ListingId;
 import io.github.tom2824.pricingintel.domain.ProductId;
 import io.github.tom2824.pricingintel.domain.SourceId;
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,5 +49,16 @@ public class PostgresListingProvider implements ListingProvider {
                         URI.create(entity.getUrl()),
                         entity.getExternalRef()))
                 .toList();
+    }
+
+    /** Les annonces qui ont un relevé ce jour-là : une seconde exécution ne les refetche pas (ADR 0017). */
+    @Override
+    @Transactional(readOnly = true)
+    public Set<ListingId> collectedOn(LocalDate day) {
+        return jdbc.sql("select l.code from listing l join price_snapshot s on s.listing_id = l.id where s.observed_date = :day")
+                .param("day", day)
+                .query(String.class).list().stream()
+                .map(ListingId::new)
+                .collect(Collectors.toSet());
     }
 }

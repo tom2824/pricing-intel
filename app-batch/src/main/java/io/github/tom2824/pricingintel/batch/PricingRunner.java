@@ -66,19 +66,29 @@ class PricingRunner implements ApplicationRunner {
         LOG.info("Recommandations : {} profil(s) ({}), référence « {} » ; {} source(s) min, plancher marge {} %, plafond {} % médiane, ±{} %/jour, arrondi ,{}",
                 profiles.size(), String.join(", ", profiles.keySet()), defaultKey, properties.minSources(),
                 properties.marginFloorPercent(), properties.ceilingPercentOfMedian(), properties.maxDailyMovePercent(), properties.roundingCents());
+        int failed = 0;
         for (MarketOfferQuery.ActiveProduct product : query.activeProducts()) {
-            for (MarketScope scope : MarketScope.values()) {
-                List<ObservedOffer> observed = query.latestOffers(product.id(), scope, since);
-                MarketView market = builder.build(product.context().id(), scope, now, product.currency(), observed);
-                for (Map.Entry<String, PricingProfile> entry : profiles.entrySet()) {
-                    boolean isDefault = entry.getKey().equals(defaultKey);
-                    Recommendation r = engine.recommend(market, product.context(), entry.getValue(), entry.getKey(), isDefault);
-                    recommendations.add(r);
-                    if (scope == MarketScope.STRICT && isDefault) {
-                        LOG.info("  {} · {} · {}", product.context().name(), summary(r), r.explanation().render());
+            // Un produit en échec (relevé inattendu, erreur SQL) prive ce produit de recommandation, pas les autres.
+            try {
+                for (MarketScope scope : MarketScope.values()) {
+                    List<ObservedOffer> observed = query.latestOffers(product.id(), scope, since);
+                    MarketView market = builder.build(product.context().id(), scope, now, product.currency(), observed);
+                    for (Map.Entry<String, PricingProfile> entry : profiles.entrySet()) {
+                        boolean isDefault = entry.getKey().equals(defaultKey);
+                        Recommendation r = engine.recommend(market, product.context(), entry.getValue(), entry.getKey(), isDefault);
+                        recommendations.add(r);
+                        if (scope == MarketScope.STRICT && isDefault) {
+                            LOG.info("  {} · {} · {}", product.context().name(), summary(r), r.explanation().render());
+                        }
                     }
                 }
+            } catch (RuntimeException e) {
+                failed++;
+                LOG.warn("  {} : recommandations impossibles ({})", product.context().name(), e.toString());
             }
+        }
+        if (failed > 0) {
+            LOG.error("{} produit(s) sans recommandation aujourd'hui", failed);
         }
         lastRecommendations = List.copyOf(recommendations);
 

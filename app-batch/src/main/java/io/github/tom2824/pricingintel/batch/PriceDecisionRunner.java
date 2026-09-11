@@ -58,6 +58,7 @@ class PriceDecisionRunner implements ApplicationRunner {
         }
         Instant now = clock.instant();
         LocalDate today = LocalDate.ofInstant(now, ZoneOffset.UTC);
+        String defaultKey = properties.defaultProfileKey();
 
         Map<String, List<Recommendation>> byProduct = new LinkedHashMap<>();
         for (Recommendation r : pricing.lastRecommendations()) {
@@ -68,6 +69,7 @@ class PriceDecisionRunner implements ApplicationRunner {
 
         int recorded = 0;
         int changed = 0;
+        int failed = 0;
         for (MarketOfferQuery.ActiveProduct product : query.activeProducts()) {
             List<Recommendation> candidates = byProduct.getOrDefault(String.valueOf(product.id()), List.of()).stream()
                     .filter(r -> !r.fellBack() && r.price() != null)
@@ -76,7 +78,7 @@ class PriceDecisionRunner implements ApplicationRunner {
             PostgresPriceDecisionStore.Decision decision;
             if (candidates.isEmpty()) {
                 decision = new PostgresPriceDecisionStore.Decision(product.id(), today, now, oldPrice, oldPrice,
-                        product.currency().getCurrencyCode(), properties.defaultProfileKey(), "hold", false,
+                        product.currency().getCurrencyCode(), defaultKey, "hold", false,
                         "aucune règle ne propose de prix aujourd'hui (marché insuffisant) : prix maintenu");
             } else {
                 List<String> keys = candidates.stream().map(Recommendation::profileKey).sorted().toList();
@@ -89,14 +91,20 @@ class PriceDecisionRunner implements ApplicationRunner {
                         (moves ? "règle « " + key + " » : " + oldPrice + " → " + newPrice : "règle « " + key + " » : prix inchangé à " + newPrice)
                                 + " · " + chosen.explanation().render());
             }
-            if (target.record(decision)) {
-                recorded++;
-                if (decision.changed()) {
-                    changed++;
-                    LOG.info("  {} · règle {} · {} → {}", product.context().name(), decision.profileKey(), decision.oldPrice(), decision.newPrice());
+            try {
+                if (target.record(decision)) {
+                    recorded++;
+                    if (decision.changed()) {
+                        changed++;
+                        LOG.info("  {} · règle {} · {} → {}", product.context().name(), decision.profileKey(), decision.oldPrice(), decision.newPrice());
+                    }
                 }
+            } catch (RuntimeException e) {
+                failed++;
+                LOG.warn("  {} : décision non enregistrée ({})", product.context().name(), e.toString());
             }
         }
-        LOG.info("Décisions tarifaires du {} : {} enregistrée(s), {} prix modifié(s)", today, recorded, changed);
+        LOG.info("Décisions tarifaires du {} : {} enregistrée(s), {} prix modifié(s){}", today, recorded, changed,
+                failed > 0 ? ", " + failed + " en échec" : "");
     }
 }

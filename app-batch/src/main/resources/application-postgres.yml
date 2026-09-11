@@ -9,12 +9,19 @@ spring:
     password: ${PRICING_INTEL_DB_PASSWORD:}
     hikari:
       maximum-pool-size: 3                     # un batch séquentiel n'a pas besoin de plus
+      connection-timeout: 10000                # 10 s pour obtenir une connexion, sinon une erreur claire
+      initialization-fail-timeout: 20000       # base injoignable au démarrage : échec en 20 s, pas au bout du timeout du job
+      data-source-properties:
+        connectTimeout: 10                     # secondes, poignée de main TCP/TLS (pilote PostgreSQL)
+        socketTimeout: 120                     # secondes, une requête qui ne répond plus n'attend pas indéfiniment
   jpa:
     hibernate:
       ddl-auto: none                           # le schéma appartient à Flyway
     open-in-view: false
   flyway:
     enabled: true
+    connect-retries: 3                         # un pooler qui redémarre : trois essais espacés avant d'abandonner
+    connect-retries-interval: 10s
 
 collector:
   listings:

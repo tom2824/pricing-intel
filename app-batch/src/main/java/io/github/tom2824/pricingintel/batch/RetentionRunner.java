@@ -1,6 +1,6 @@
 package io.github.tom2824.pricingintel.batch;
 
-import io.github.tom2824.pricingintel.persistence.PostgresRetention;
+import io.github.tom2824.pricingintel.collector.Retention;
 import java.time.Clock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,10 +21,10 @@ class RetentionRunner implements ApplicationRunner {
     private static final Logger LOG = LoggerFactory.getLogger(RetentionRunner.class);
 
     private final RetentionProperties properties;
-    private final ObjectProvider<PostgresRetention> retention;
+    private final ObjectProvider<Retention> retention;
     private final Clock clock;
 
-    RetentionRunner(RetentionProperties properties, ObjectProvider<PostgresRetention> retention, Clock clock) {
+    RetentionRunner(RetentionProperties properties, ObjectProvider<Retention> retention, Clock clock) {
         this.properties = properties;
         this.retention = retention;
         this.clock = clock;
@@ -32,12 +32,12 @@ class RetentionRunner implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        PostgresRetention target = retention.getIfAvailable();
+        Retention target = retention.getIfAvailable();
         if (!properties.enabled() || target == null) {
             return;
         }
         try {
-            PostgresRetention.Result result = target.purge(properties.toPolicy(), clock.instant());
+            Retention.Result result = target.purge(properties.toPolicy(), clock.instant());
             LOG.info("Rétention : {} ligne(s) supprimée(s) ({} recommandation(s) de profils secondaires > {} j, "
                             + "{} du profil de référence > {} j, {} échec(s) de collecte > {} j) ; {} recommandation(s) de référence compactée(s)",
                     result.deleted(), result.otherProfiles(), properties.otherProfilesRecommendations().toDays(),

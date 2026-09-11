@@ -1,9 +1,7 @@
 package io.github.tom2824.pricingintel.persistence;
 
-import java.math.BigDecimal;
+import io.github.tom2824.pricingintel.pricing.PriceDecisionStore;
 import java.sql.Types;
-import java.time.Instant;
-import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.Objects;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -13,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
  * Enregistre la décision tarifaire du jour d'un produit et, si elle change le prix, met à jour le prix courant
  * (ADR 0023). Une seule décision par produit et par jour : une seconde exécution le même jour ne fait rien.
  */
-public class PostgresPriceDecisionStore {
+public class PostgresPriceDecisionStore implements PriceDecisionStore {
 
     private final JdbcClient jdbc;
 
@@ -21,13 +19,10 @@ public class PostgresPriceDecisionStore {
         this.jdbc = Objects.requireNonNull(jdbc, "jdbc");
     }
 
-    public record Decision(long productId, LocalDate date, Instant decidedAt, BigDecimal oldPrice, BigDecimal newPrice,
-                           String currency, String profileKey, String strategy, boolean changed, String reason) {
-    }
-
-    /** @return {@code true} si la décision a été enregistrée, {@code false} si le produit avait déjà sa décision du jour */
+    @Override
     @Transactional
-    public boolean record(Decision d) {
+    public boolean record(PriceDecision d) {
+        long productId = Long.parseLong(d.product().value());
         int inserted = jdbc.sql("""
                         insert into product_price_decision (product_id, decision_date, decided_at, old_price, new_price, currency,
                                                             profile_key, strategy, changed, reason)
@@ -35,12 +30,12 @@ public class PostgresPriceDecisionStore {
                                 :profile_key, :strategy, :changed, :reason)
                         on conflict (product_id, decision_date) do nothing
                         """)
-                .param("product_id", d.productId())
+                .param("product_id", productId)
                 .param("decision_date", d.date())
                 .param("decided_at", d.decidedAt().atOffset(ZoneOffset.UTC))
                 .param("old_price", d.oldPrice(), Types.NUMERIC)
                 .param("new_price", d.newPrice(), Types.NUMERIC)
-                .param("currency", d.currency())
+                .param("currency", d.currency().getCurrencyCode())
                 .param("profile_key", d.profileKey())
                 .param("strategy", d.strategy())
                 .param("changed", d.changed())
@@ -52,7 +47,7 @@ public class PostgresPriceDecisionStore {
         if (d.changed()) {
             jdbc.sql("update product set current_price = :price where id = :id")
                     .param("price", d.newPrice(), Types.NUMERIC)
-                    .param("id", d.productId())
+                    .param("id", productId)
                     .update();
         }
         return true;

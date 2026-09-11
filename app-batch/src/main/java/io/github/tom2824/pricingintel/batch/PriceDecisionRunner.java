@@ -1,9 +1,10 @@
 package io.github.tom2824.pricingintel.batch;
 
-import io.github.tom2824.pricingintel.persistence.MarketOfferQuery;
-import io.github.tom2824.pricingintel.persistence.PostgresPriceDecisionStore;
 import io.github.tom2824.pricingintel.pricing.DecisionLottery;
+import io.github.tom2824.pricingintel.pricing.MarketOffers;
 import io.github.tom2824.pricingintel.pricing.MarketScope;
+import io.github.tom2824.pricingintel.pricing.PriceDecisionStore;
+import io.github.tom2824.pricingintel.pricing.PriceDecisionStore.PriceDecision;
 import io.github.tom2824.pricingintel.pricing.Recommendation;
 import java.math.BigDecimal;
 import java.time.Clock;
@@ -36,12 +37,12 @@ class PriceDecisionRunner implements ApplicationRunner {
 
     private final PricingProperties properties;
     private final PricingRunner pricing;
-    private final ObjectProvider<MarketOfferQuery> offers;
-    private final ObjectProvider<PostgresPriceDecisionStore> store;
+    private final ObjectProvider<MarketOffers> offers;
+    private final ObjectProvider<PriceDecisionStore> store;
     private final Clock clock;
 
-    PriceDecisionRunner(PricingProperties properties, PricingRunner pricing, ObjectProvider<MarketOfferQuery> offers,
-                        ObjectProvider<PostgresPriceDecisionStore> store, Clock clock) {
+    PriceDecisionRunner(PricingProperties properties, PricingRunner pricing, ObjectProvider<MarketOffers> offers,
+                        ObjectProvider<PriceDecisionStore> store, Clock clock) {
         this.properties = properties;
         this.pricing = pricing;
         this.offers = offers;
@@ -51,8 +52,8 @@ class PriceDecisionRunner implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        MarketOfferQuery query = offers.getIfAvailable();
-        PostgresPriceDecisionStore target = store.getIfAvailable();
+        MarketOffers query = offers.getIfAvailable();
+        PriceDecisionStore target = store.getIfAvailable();
         if (!properties.enabled() || !properties.dailyDecision() || query == null || target == null) {
             return;
         }
@@ -70,15 +71,14 @@ class PriceDecisionRunner implements ApplicationRunner {
         int recorded = 0;
         int changed = 0;
         int failed = 0;
-        for (MarketOfferQuery.ActiveProduct product : query.activeProducts()) {
-            List<Recommendation> candidates = byProduct.getOrDefault(String.valueOf(product.id()), List.of()).stream()
+        for (MarketOffers.ActiveProduct product : query.activeProducts()) {
+            List<Recommendation> candidates = byProduct.getOrDefault(product.id().value(), List.of()).stream()
                     .filter(r -> !r.fellBack() && r.price() != null)
                     .toList();
             BigDecimal oldPrice = product.context().currentPrice() == null ? null : product.context().currentPrice().amount();
-            PostgresPriceDecisionStore.Decision decision;
+            PriceDecision decision;
             if (candidates.isEmpty()) {
-                decision = new PostgresPriceDecisionStore.Decision(product.id(), today, now, oldPrice, oldPrice,
-                        product.currency().getCurrencyCode(), defaultKey, "hold", false,
+                decision = new PriceDecision(product.id(), today, now, oldPrice, oldPrice, product.currency(), defaultKey, "hold", false,
                         "aucune règle ne propose de prix aujourd'hui (marché insuffisant) : prix maintenu");
             } else {
                 List<String> keys = candidates.stream().map(Recommendation::profileKey).sorted().toList();
@@ -86,8 +86,7 @@ class PriceDecisionRunner implements ApplicationRunner {
                 Recommendation chosen = candidates.stream().filter(r -> r.profileKey().equals(key)).findFirst().orElseThrow();
                 BigDecimal newPrice = chosen.price().amount();
                 boolean moves = oldPrice == null || oldPrice.compareTo(newPrice) != 0;
-                decision = new PostgresPriceDecisionStore.Decision(product.id(), today, now, oldPrice, newPrice,
-                        product.currency().getCurrencyCode(), key, chosen.strategyId(), moves,
+                decision = new PriceDecision(product.id(), today, now, oldPrice, newPrice, product.currency(), key, chosen.strategyId(), moves,
                         (moves ? "règle « " + key + " » : " + oldPrice + " → " + newPrice : "règle « " + key + " » : prix inchangé à " + newPrice)
                                 + " · " + chosen.explanation().render());
             }

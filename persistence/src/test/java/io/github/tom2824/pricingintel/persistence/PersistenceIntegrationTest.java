@@ -3,7 +3,10 @@ package io.github.tom2824.pricingintel.persistence;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import io.github.tom2824.pricingintel.collector.CatalogueImport;
 import io.github.tom2824.pricingintel.collector.CollectionReport;
+import io.github.tom2824.pricingintel.domain.ProductId;
+import io.github.tom2824.pricingintel.pricing.MarketOffers;
 import io.github.tom2824.pricingintel.domain.Availability;
 import io.github.tom2824.pricingintel.domain.Listing;
 import io.github.tom2824.pricingintel.domain.ListingId;
@@ -71,13 +74,13 @@ class PersistenceIntegrationTest {
     @Test
     @Order(2)
     void importsTheCatalogueIdempotently() {
-        CatalogueImporter.Result first = importer.importFile(Path.of("src/test/resources/catalogue-test.yml"));
+        CatalogueImport.Result first = importer.importFile(Path.of("src/test/resources/catalogue-test.yml"));
 
         assertThat(first.productsCreated()).isEqualTo(4);
         assertThat(first.listingsCreated()).isEqualTo(4);
         assertThat(first.matchesCreated()).isEqualTo(3);
 
-        CatalogueImporter.Result second = importer.importFile(Path.of("src/test/resources/catalogue-test.yml"));
+        CatalogueImport.Result second = importer.importFile(Path.of("src/test/resources/catalogue-test.yml"));
 
         assertThat(second.productsCreated()).isZero();
         assertThat(second.productsUpdated()).isEqualTo(4);
@@ -165,7 +168,7 @@ class PersistenceIntegrationTest {
     @Test
     @Order(9)
     void readsLatestOffersPerScopeAndStoresRecommendations() {
-        long msi = jdbc.sql("select id from product where brand = 'MSI'").query(Long.class).single();
+        ProductId msi = new ProductId(jdbc.sql("select id from product where brand = 'MSI'").query(Long.class).single().toString());
         Instant since = DAY1.minus(Duration.ofDays(1));
 
         List<io.github.tom2824.pricingintel.pricing.ObservedOffer> strict = marketOffers.latestOffers(msi, io.github.tom2824.pricingintel.pricing.MarketScope.STRICT, since);
@@ -178,9 +181,9 @@ class PersistenceIntegrationTest {
         assertThat(segment).filteredOn(o -> o.listing().value().equals("ldlc-rtx4070s-gigabyte"))
                 .singleElement().satisfies(o -> assertThat(o.quarantined()).isTrue());
 
-        List<MarketOfferQuery.ActiveProduct> products = marketOffers.activeProducts();
+        List<MarketOffers.ActiveProduct> products = marketOffers.activeProducts();
         assertThat(products).hasSize(4);
-        MarketOfferQuery.ActiveProduct msiProduct = products.stream().filter(p -> p.id() == msi).findFirst().orElseThrow();
+        MarketOffers.ActiveProduct msiProduct = products.stream().filter(p -> p.id().equals(msi)).findFirst().orElseThrow();
         assertThat(msiProduct.context().purchasePriceIfAny()).contains(Money.eur("520"));
 
         var market = io.github.tom2824.pricingintel.pricing.MarketBuilder.withDefaults()

@@ -3,6 +3,7 @@ package io.github.tom2824.pricingintel.persistence;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import io.github.tom2824.pricingintel.collector.Retention;
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
 import java.time.Duration;
 import java.time.Instant;
@@ -26,8 +27,8 @@ import org.springframework.test.context.ActiveProfiles;
 class PostgresRetentionTest {
 
     private static final Instant NOW = PersistenceTestApplication.NOW;
-    private static final PostgresRetention.Policy POLICY =
-            new PostgresRetention.Policy(Duration.ofDays(365), Duration.ofDays(7), Duration.ofDays(180));
+    private static final Retention.Policy POLICY =
+            new Retention.Policy(Duration.ofDays(365), Duration.ofDays(7), Duration.ofDays(180));
 
     @Autowired
     PostgresRetention retention;
@@ -68,7 +69,7 @@ class PostgresRetentionTest {
 
     @Test
     void purgesEachWindowAndNeverTheLatestOfAProfile() {
-        PostgresRetention.Result result = retention.purge(POLICY, NOW);
+        Retention.Result result = retention.purge(POLICY, NOW);
 
         assertThat(result.defaultProfile()).as("référence > 365 j, sauf la dernière").isEqualTo(1);
         assertThat(result.otherProfiles()).as("secondaires > 7 j, sauf la dernière").isEqualTo(1);
@@ -110,16 +111,16 @@ class PostgresRetentionTest {
     void secondPurgeChangesNothing() {
         retention.purge(POLICY, NOW);
 
-        PostgresRetention.Result again = retention.purge(POLICY, NOW);
+        Retention.Result again = retention.purge(POLICY, NOW);
 
-        assertThat(again).isEqualTo(new PostgresRetention.Result(0, 0, 0, 0));
+        assertThat(again).isEqualTo(new Retention.Result(0, 0, 0, 0));
     }
 
     @Test
     void refusesAWindowThatWouldPurgeEverything() {
-        assertThatThrownBy(() -> new PostgresRetention.Policy(Duration.ofDays(365), Duration.ofDays(7), Duration.ofDays(-1)))
+        assertThatThrownBy(() -> new Retention.Policy(Duration.ofDays(365), Duration.ofDays(7), Duration.ofDays(-1)))
                 .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("failures");
-        assertThatThrownBy(() -> new PostgresRetention.Policy(Duration.ZERO, Duration.ofDays(7), Duration.ofDays(180)))
+        assertThatThrownBy(() -> new Retention.Policy(Duration.ZERO, Duration.ofDays(7), Duration.ofDays(180)))
                 .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("defaultProfileRecommendations");
     }
 

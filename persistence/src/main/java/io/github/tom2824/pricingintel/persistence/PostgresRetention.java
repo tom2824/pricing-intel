@@ -1,6 +1,6 @@
 package io.github.tom2824.pricingintel.persistence;
 
-import java.time.Duration;
+import io.github.tom2824.pricingintel.collector.Retention;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.Objects;
@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
  * de référence sur une fenêtre longue, la dernière de chaque profil toujours gardée. L'unicité par jour est
  * garantie par la table elle-même (une recommandation par jour et par profil, la première exécution fait foi).
  */
-public class PostgresRetention {
+public class PostgresRetention implements Retention {
 
     private final JdbcClient jdbc;
 
@@ -22,26 +22,7 @@ public class PostgresRetention {
         this.jdbc = Objects.requireNonNull(jdbc, "jdbc");
     }
 
-    public record Policy(Duration defaultProfileRecommendations, Duration otherProfilesRecommendations, Duration failures) {
-        public Policy {
-            requirePositive(defaultProfileRecommendations, "defaultProfileRecommendations");
-            requirePositive(otherProfilesRecommendations, "otherProfilesRecommendations");
-            requirePositive(failures, "failures");
-        }
-
-        private static void requirePositive(Duration duration, String name) {
-            if (duration == null || duration.isZero() || duration.isNegative()) {
-                throw new IllegalArgumentException("Retention window '" + name + "' must be positive, got " + duration);
-            }
-        }
-    }
-
-    public record Result(int otherProfiles, int defaultProfile, int compacted, int failures) {
-        public int deleted() {
-            return otherProfiles + defaultProfile + failures;
-        }
-    }
-
+    @Override
     @Transactional
     public Result purge(Policy policy, Instant now) {
         // 1. Profils secondaires : fenêtre courte, mais jamais la dernière de chaque profil (vue recommendation_latest).

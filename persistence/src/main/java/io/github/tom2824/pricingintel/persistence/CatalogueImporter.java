@@ -2,6 +2,7 @@ package io.github.tom2824.pricingintel.persistence;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import io.github.tom2824.pricingintel.collector.CatalogueImport;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Path;
@@ -21,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
  * Une annonce qui déclare un produit reçoit une correspondance validée manuelle (ADR 0016) ; si elle en avait
  * une vers un autre produit, l'ancienne est clôturée, pas effacée.
  */
-public class CatalogueImporter {
+public class CatalogueImporter implements CatalogueImport {
 
     private static final Logger LOG = LoggerFactory.getLogger(CatalogueImporter.class);
     private static final ObjectMapper YAML = new ObjectMapper(new YAMLFactory());
@@ -46,13 +47,6 @@ public class CatalogueImporter {
         this.clock = clock;
     }
 
-    public record Result(int productsCreated, int productsUpdated, int listingsCreated, int listingsUpdated, int matchesCreated) {
-        public String summary() {
-            return "%d produit(s) créé(s), %d mis à jour ; %d annonce(s) créée(s), %d mise(s) à jour ; %d correspondance(s) créée(s)"
-                    .formatted(productsCreated, productsUpdated, listingsCreated, listingsUpdated, matchesCreated);
-        }
-    }
-
     public static CatalogueFile parse(Path file) {
         try {
             return YAML.readValue(file.toFile(), CatalogueFile.class);
@@ -61,6 +55,7 @@ public class CatalogueImporter {
         }
     }
 
+    @Override
     @Transactional
     public Result importFile(Path file) {
         return importCatalogue(parse(file));

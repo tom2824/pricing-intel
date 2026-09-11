@@ -1,11 +1,11 @@
 package io.github.tom2824.pricingintel.batch;
 
+import io.github.tom2824.pricingintel.collector.CatalogueImport;
 import io.github.tom2824.pricingintel.collector.CollectionReport;
 import io.github.tom2824.pricingintel.collector.CollectionReportSink;
 import io.github.tom2824.pricingintel.collector.CollectionRun;
 import io.github.tom2824.pricingintel.collector.PriceSink;
 import io.github.tom2824.pricingintel.collector.RawSnapshotStore;
-import io.github.tom2824.pricingintel.persistence.CatalogueImporter;
 import java.nio.file.Path;
 import java.time.Clock;
 import java.util.Optional;
@@ -34,12 +34,12 @@ class CollectRunner implements ApplicationRunner, ExitCodeGenerator {
     private final PriceSink sink;
     private final RawSnapshotStore rawStore;
     private final CollectionReportSink reportSink;
-    private final ObjectProvider<CatalogueImporter> catalogueImporter;
+    private final ObjectProvider<CatalogueImport> catalogueImporter;
     private final Clock clock;
     private CollectionReport lastReport;
 
     CollectRunner(CollectorProperties properties, CollectionRun collectionRun, PriceSink sink, RawSnapshotStore rawStore,
-                  CollectionReportSink reportSink, ObjectProvider<CatalogueImporter> catalogueImporter, Clock clock) {
+                  CollectionReportSink reportSink, ObjectProvider<CatalogueImport> catalogueImporter, Clock clock) {
         this.properties = properties;
         this.collectionRun = collectionRun;
         this.sink = sink;
@@ -78,10 +78,10 @@ class CollectRunner implements ApplicationRunner, ExitCodeGenerator {
         if (catalogue.importFile() == null || catalogue.importFile().isBlank()) {
             return true;
         }
-        CatalogueImporter importer = catalogueImporter.getIfAvailable(() -> {
+        CatalogueImport importer = catalogueImporter.getIfAvailable(() -> {
             throw new IllegalStateException("collector.catalogue.import-file requires the 'postgres' Spring profile");
         });
-        CatalogueImporter.Result result = importer.importFile(Path.of(catalogue.importFile()));
+        CatalogueImport.Result result = importer.importFile(Path.of(catalogue.importFile()));
         LOG.info("Catalogue importé depuis {} : {}", catalogue.importFile(), result.summary());
         return catalogue.collectAfterImport();
     }

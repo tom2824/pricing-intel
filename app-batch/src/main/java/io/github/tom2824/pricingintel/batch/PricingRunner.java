@@ -1,14 +1,14 @@
 package io.github.tom2824.pricingintel.batch;
 
-import io.github.tom2824.pricingintel.persistence.MarketOfferQuery;
-import io.github.tom2824.pricingintel.persistence.PostgresRecommendationSink;
 import io.github.tom2824.pricingintel.pricing.MarketBuilder;
+import io.github.tom2824.pricingintel.pricing.MarketOffers;
 import io.github.tom2824.pricingintel.pricing.MarketScope;
 import io.github.tom2824.pricingintel.pricing.MarketView;
 import io.github.tom2824.pricingintel.pricing.ObservedOffer;
 import io.github.tom2824.pricingintel.pricing.PricingEngine;
 import io.github.tom2824.pricingintel.pricing.PricingProfile;
 import io.github.tom2824.pricingintel.pricing.Recommendation;
+import io.github.tom2824.pricingintel.pricing.RecommendationSink;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Instant;
@@ -28,6 +28,8 @@ import org.springframework.stereotype.Component;
  * Après la collecte : pour chaque produit actif, construit le marché strict et le marché de segment sur la
  * fenêtre de fraîcheur, calcule une recommandation par profil déclaré, affiche celle du profil de référence
  * et stocke le tout (ADR 0005, 0022). Ne fait rien sans base (profil postgres absent) ou si {@code pricing.enabled=false}.
+ * Ne connaît que les ports du moteur : d'où viennent les relevés et où vont les recommandations est l'affaire
+ * de l'assemblage.
  */
 @Component
 @Order(2)
@@ -36,13 +38,13 @@ class PricingRunner implements ApplicationRunner {
     private static final Logger LOG = LoggerFactory.getLogger(PricingRunner.class);
 
     private final PricingProperties properties;
-    private final ObjectProvider<MarketOfferQuery> offers;
-    private final ObjectProvider<PostgresRecommendationSink> sink;
+    private final ObjectProvider<MarketOffers> offers;
+    private final ObjectProvider<RecommendationSink> sink;
     private final Clock clock;
     private List<Recommendation> lastRecommendations = List.of();
 
-    PricingRunner(PricingProperties properties, ObjectProvider<MarketOfferQuery> offers,
-                  ObjectProvider<PostgresRecommendationSink> sink, Clock clock) {
+    PricingRunner(PricingProperties properties, ObjectProvider<MarketOffers> offers,
+                  ObjectProvider<RecommendationSink> sink, Clock clock) {
         this.properties = properties;
         this.offers = offers;
         this.sink = sink;
@@ -51,7 +53,7 @@ class PricingRunner implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        MarketOfferQuery query = offers.getIfAvailable();
+        MarketOffers query = offers.getIfAvailable();
         if (!properties.enabled() || query == null) {
             return;
         }
@@ -67,7 +69,7 @@ class PricingRunner implements ApplicationRunner {
                 profiles.size(), String.join(", ", profiles.keySet()), defaultKey, properties.minSources(),
                 properties.marginFloorPercent(), properties.ceilingPercentOfMedian(), properties.maxDailyMovePercent(), properties.roundingCents());
         int failed = 0;
-        for (MarketOfferQuery.ActiveProduct product : query.activeProducts()) {
+        for (MarketOffers.ActiveProduct product : query.activeProducts()) {
             // Un produit en échec (relevé inattendu, erreur SQL) prive ce produit de recommandation, pas les autres.
             try {
                 for (MarketScope scope : MarketScope.values()) {
@@ -92,7 +94,7 @@ class PricingRunner implements ApplicationRunner {
         }
         lastRecommendations = List.copyOf(recommendations);
 
-        PostgresRecommendationSink target = sink.getIfAvailable();
+        RecommendationSink target = sink.getIfAvailable();
         if (target != null) {
             target.accept(recommendations);
             LOG.info("{} recommandation(s) stockée(s)", recommendations.size());

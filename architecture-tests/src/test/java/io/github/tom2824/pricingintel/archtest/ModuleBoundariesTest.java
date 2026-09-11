@@ -69,6 +69,30 @@ class ModuleBoundariesTest {
             .that().resideOutsideOfPackages(BATCH, PERSISTENCE)
             .should().dependOnClassesThat().resideInAnyPackage("org.springframework..", "jakarta..");
 
+    /**
+     * L'application ne connaît la persistance que dans son assemblage (classe principale et configurations) :
+     * les runners et les propriétés parlent aux ports (ListingProvider, PriceSink, MarketOffers, PriceDecisionStore,
+     * RecommendationSink, Retention, CatalogueImport), jamais aux classes PostgreSQL. C'est ce qui rend
+     * l'adaptateur remplaçable.
+     */
+    @ArchTest
+    static final ArchRule application_reaches_persistence_only_through_its_assembly = noClasses()
+            .that().resideInAPackage(BATCH)
+            .and().haveSimpleNameNotEndingWith("Configuration").and().haveSimpleNameNotEndingWith("Application")
+            .should().dependOnClassesThat().resideInAPackage(PERSISTENCE);
+
+    /** JPA est un détail de l'adaptateur de persistance, pas un vocabulaire partagé. */
+    @ArchTest
+    static final ArchRule jpa_stays_inside_the_persistence_adapter = noClasses()
+            .that().resideOutsideOfPackages(PERSISTENCE)
+            .should().dependOnClassesThat().resideInAPackage("jakarta.persistence..");
+
+    /** « java.. » autorise java.sql : on ferme explicitement cette porte au domaine, au cœur et au moteur. */
+    @ArchTest
+    static final ArchRule domain_core_and_pricing_ignore_jdbc = noClasses()
+            .that().resideInAnyPackage(DOMAIN, CORE, PRICING)
+            .should().dependOnClassesThat().resideInAnyPackage("java.sql..", "javax.sql..");
+
     @ArchTest
     static final ArchRule modules_are_free_of_cycles = slices()
             .matching(ROOT + ".(*)..")

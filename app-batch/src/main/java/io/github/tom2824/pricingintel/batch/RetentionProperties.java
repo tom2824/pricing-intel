@@ -1,6 +1,6 @@
 package io.github.tom2824.pricingintel.batch;
 
-import io.github.tom2824.pricingintel.persistence.PostgresRetention;
+import io.github.tom2824.pricingintel.collector.Retention;
 import jakarta.validation.constraints.NotNull;
 import java.time.Duration;
 import org.hibernate.validator.constraints.time.DurationMin;
@@ -23,7 +23,7 @@ public record RetentionProperties(
         @NotNull @DurationMin(days = 1) @DefaultValue("7d") Duration otherProfilesRecommendations,
         @NotNull @DurationMin(days = 1) @DefaultValue("180d") Duration failures) {
 
-    public PostgresRetention.Policy toPolicy() {
-        return new PostgresRetention.Policy(defaultProfileRecommendations, otherProfilesRecommendations, failures);
+    public Retention.Policy toPolicy() {
+        return new Retention.Policy(defaultProfileRecommendations, otherProfilesRecommendations, failures);
     }
 }

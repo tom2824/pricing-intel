@@ -1,0 +1,8 @@
+# Met à jour les actions GitHub des workflows (checkout, setup-java, upload-artifact...) par pull request,
+# pour ne plus découvrir une dépréciation dans les avertissements d'un run.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly

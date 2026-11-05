@@ -33,11 +33,13 @@ import org.springframework.test.context.ActiveProfiles;
 /**
  * Un vrai PostgreSQL embarqué, les vraies migrations Flyway, et le cycle complet : import du catalogue,
  * annonces fournies au collecteur, relevés écrits avec quarantaine, échecs stockés.
- * Les tests s'enchaînent sur la même base, dans l'ordre.
+ * Les tests s'enchaînent sur la même base, dans l'ordre. La base est recréée avant la classe : sans cela, elle hériterait
+ * des produits et des exécutions laissés par une autre classe de test, selon l'ordre choisi par Surefire.
  */
 @SpringBootTest
 @ActiveProfiles("postgres")
-@AutoConfigureEmbeddedDatabase(provider = AutoConfigureEmbeddedDatabase.DatabaseProvider.ZONKY)
+@AutoConfigureEmbeddedDatabase(provider = AutoConfigureEmbeddedDatabase.DatabaseProvider.ZONKY,
+        refresh = AutoConfigureEmbeddedDatabase.RefreshMode.BEFORE_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class PersistenceIntegrationTest {
 
